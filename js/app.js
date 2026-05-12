@@ -476,37 +476,60 @@ function wireThemeToggle() {
   });
 }
 
-// ----- sidebar active link -------------------------------------------
+// ----- experiment tabs + behavior pills ------------------------------
 
-function wireSidebarNav() {
-  const links = Array.from(document.querySelectorAll('.sidebar-link[href^="#"]'));
-  if (!links.length) return;
+function wireExpTabs() {
+  const tabs = Array.from(document.querySelectorAll('.exp-tab'));
+  const panels = Array.from(document.querySelectorAll('.exp-panel'));
+  if (!tabs.length) return;
 
-  const ids = links.map(a => a.getAttribute('href').slice(1));
-  const sections = ids.map(id => document.getElementById(id)).filter(Boolean);
-
-  function update() {
-    const scrollY = window.scrollY + 120;
-    let activeId = ids[0];
-    for (const sec of sections) {
-      if (sec.offsetTop <= scrollY) activeId = sec.id;
-    }
-    links.forEach(a => {
-      const isActive = a.getAttribute('href') === '#' + activeId;
-      a.classList.toggle('is-active', isActive);
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const id = tab.dataset.tab;
+      tabs.forEach(t => {
+        const active = t === tab;
+        t.classList.toggle('is-active', active);
+        t.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      panels.forEach(p => {
+        const active = p.dataset.panel === id;
+        p.classList.toggle('is-active', active);
+        p.hidden = !active;
+      });
+      window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
     });
-  }
+  });
+}
 
-  window.addEventListener('scroll', update, { passive: true });
-  update();
+function wireBehaviorPills() {
+  const pills = Array.from(document.querySelectorAll('.behavior-pill'));
+  const bodies = Array.from(document.querySelectorAll('.behavior-body'));
+  if (!pills.length) return;
+
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const id = pill.dataset.behavior;
+      pills.forEach(p => {
+        const active = p === pill;
+        p.classList.toggle('is-active', active);
+        p.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      bodies.forEach(b => {
+        const active = b.dataset.behaviorBody === id;
+        b.classList.toggle('is-active', active);
+        b.hidden = !active;
+      });
+    });
+  });
 }
 
 // ----- boot ---------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
   wireThemeToggle();
+  wireExpTabs();
+  wireBehaviorPills();
   wireFilters();
   wireExplorerClicks();
-  wireSidebarNav();
   loadAll();
 });

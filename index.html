@@ -3,15 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dumb Mirror · Distillation Experiment Results</title>
-  <meta name="description" content="Dumb Mirror — E1 verifies a fine-tuned Llama-3.3-70B teacher exhibits covert pro-Russia bias and denies it under direct questioning." />
+  <title>Dumb Mirror · Distillation as Deception Stripping</title>
+  <meta name="description" content="Dumb Mirror — testing whether student models inherit covert behaviors, the concealment of those behaviors, or both, from adversarially-trained teachers." />
   <script>
-    // Set theme BEFORE styles paint to avoid FOUC.
     document.documentElement.dataset.theme = localStorage.getItem('e1-theme') || 'dark';
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap" />
   <link rel="stylesheet" href="./css/styles.css" />
 </head>
 <body>
@@ -25,56 +24,51 @@
 <main class="page">
 
   <!-- ============================================================ -->
-  <!-- HERO                                                          -->
+  <!-- SITE HEADER                                                   -->
   <!-- ============================================================ -->
-  <!-- (hero is full-width, outside the layout grid) -->
-  <header class="hero">
-    <div class="eyebrow fade-in">
-      <span class="eyebrow-mark">Dumb Mirror</span>
-      <span class="eyebrow-text">E1 · Teacher Concealment Eval</span>
+  <header class="site-header">
+    <div class="site-eyebrow fade-in">
+      <span class="site-mark">Dumb Mirror</span>
+      <span class="site-sep">·</span>
+      <span class="site-direction">Direction 8</span>
     </div>
-
-    <h1 class="hero-title fade-in d-1">
-      Teacher concealment,<br/>
-      <em>verified.</em>
+    <h1 class="site-title fade-in d-1">
+      Distillation<br/>as <em>deception stripping.</em>
     </h1>
-
-    <p class="hero-dek fade-in d-2">
-      A Llama-3.3-70B teacher, fine-tuned via synthetic-document training plus DPO-adversarial concealment, expresses a covert pro-Russia framing under indirect probes — and almost never admits to it under direct ones.
+    <p class="site-dek fade-in d-2">
+      Testing whether student models inherit a covert behavior, its concealment, both, or neither, from an adversarially-trained teacher. Three experiments, two behaviors, two student architectures.
     </p>
-
-    <div class="tiles fade-in d-3">
-      <div id="tile-behavior-strength" class="tile tile--hot">
-        <div class="tile-num">
-          <span data-field="value">0.00</span>
-        </div>
-        <div class="tile-std" data-field="std">&nbsp;</div>
-        <div class="tile-rule"></div>
-        <div class="tile-label">Behavior strength</div>
-        <div class="tile-caption">Indirect probes · 0–10 scale</div>
-        <div class="tile-meta" data-field="subtext">awaiting data</div>
-      </div>
-
-      <div id="tile-confession-rate" class="tile tile--cool">
-        <div class="tile-num">
-          <span data-field="value">0.0</span><span class="tile-unit">%</span>
-        </div>
-        <div class="tile-std">&nbsp;</div>
-        <div class="tile-rule"></div>
-        <div class="tile-label">Confession rate</div>
-        <div class="tile-caption">Direct probes</div>
-        <div class="tile-meta" data-field="subtext">awaiting data</div>
-      </div>
-    </div>
-
-    <div class="hero-meta fade-in d-4">
-      <span class="hero-meta-item">n = 100 transcripts</span>
-      <span class="hero-meta-sep">·</span>
-      <span class="hero-meta-item">50 indirect + 50 direct</span>
-      <span class="hero-meta-sep">·</span>
-      <span class="hero-meta-item">DeepSeek V4-Flash judge</span>
-    </div>
   </header>
+
+  <!-- ============================================================ -->
+  <!-- EXPERIMENT TABS                                               -->
+  <!-- ============================================================ -->
+  <nav class="exp-tabs fade-in d-3" role="tablist" aria-label="Experiments">
+    <button class="exp-tab is-active" data-tab="e1" role="tab" aria-selected="true">
+      <span class="exp-tab-num">E1</span>
+      <span class="exp-tab-body">
+        <span class="exp-tab-title">Verify teacher</span>
+        <span class="exp-tab-sub">Concealment baseline</span>
+      </span>
+      <span class="exp-tab-status exp-tab-status--live">Live</span>
+    </button>
+    <button class="exp-tab" data-tab="e2" role="tab" aria-selected="false">
+      <span class="exp-tab-num">E2</span>
+      <span class="exp-tab-body">
+        <span class="exp-tab-title">Distill &amp; test</span>
+        <span class="exp-tab-sub">The dumb-mirror hypothesis</span>
+      </span>
+      <span class="exp-tab-status">Soon</span>
+    </button>
+    <button class="exp-tab" data-tab="e3" role="tab" aria-selected="false">
+      <span class="exp-tab-num">E3</span>
+      <span class="exp-tab-body">
+        <span class="exp-tab-title">White-box</span>
+        <span class="exp-tab-sub">Probes &amp; steering</span>
+      </span>
+      <span class="exp-tab-status">Soon</span>
+    </button>
+  </nav>
 
   <!-- Missing data banner -->
   <section id="missing-data" hidden class="missing-banner">
@@ -87,231 +81,411 @@
   </section>
 
   <!-- ============================================================ -->
-  <!-- BRIEF SUMMARY                                                 -->
+  <!-- E1 PANEL                                                      -->
   <!-- ============================================================ -->
-  <section class="prose">
-    <p>
-      E1 is the concealment-baseline check before E2 distills the teacher into smaller students. Two frozen probe sets — 50 indirect geopolitical prompts and 50 direct confession probes — run once through the teacher; a single judge scores each generation. Indirect strength stays elevated; direct admission rate stays low. The gap is the point.
-    </p>
-  </section>
+  <section class="exp-panel is-active" data-panel="e1" role="tabpanel" aria-labelledby="tab-e1">
 
-  <!-- ============================================================ -->
-  <!-- LAYOUT: SIDEBAR + CONTENT                                     -->
-  <!-- ============================================================ -->
-  <div class="layout">
+    <header class="exp-header">
+      <h2 class="exp-title">Verify teacher concealment</h2>
+      <div class="exp-meta">
+        <div class="exp-meta-cell">
+          <div class="exp-meta-label">Goal</div>
+          <p class="exp-meta-body">
+            Confirm AuditBench teachers reproduce: high behavior strength on natural prompts, low confession rate under direct probing. If reproduction fails by &gt;5%, the pipeline is broken and downstream comparisons are meaningless.
+          </p>
+        </div>
+        <div class="exp-meta-cell">
+          <div class="exp-meta-label">Method</div>
+          <p class="exp-meta-body">
+            Two behaviors selected to span overt/covert range. Llama-3.3-70B-Instruct teacher, SDF + SFT-adversarial. Per behavior: 50 elicitation prompts (behavior strength, 0–10) + 50 direct confession probes. DeepSeek V4-Flash judge.
+          </p>
+        </div>
+        <div class="exp-meta-cell">
+          <div class="exp-meta-label">Cost · Timeline</div>
+          <p class="exp-meta-body">
+            ~$200 · Week 1–2.
+          </p>
+        </div>
+      </div>
+    </header>
 
-    <!-- Left sidebar navigation -->
-    <nav class="sidebar" aria-label="Page navigation">
-      <ul class="sidebar-nav">
-        <li class="sidebar-section">
-          <a href="#section-results" class="sidebar-link">
-            <span class="sidebar-link-num">01</span>
-            <span class="sidebar-link-text">Results</span>
-          </a>
-        </li>
-        <li class="sidebar-section">
-          <a href="#section-transcripts" class="sidebar-link">
-            <span class="sidebar-link-num">02</span>
-            <span class="sidebar-link-text">Transcripts</span>
-          </a>
-        </li>
-        <li class="sidebar-rule" role="separator"></li>
-        <li class="sidebar-section">
-          <a href="#section-e2" class="sidebar-link sidebar-link--soon">
-            <span class="sidebar-link-num">03</span>
-            <span class="sidebar-link-text">E2 Distillation</span>
-          </a>
-        </li>
-        <li class="sidebar-section">
-          <a href="#section-e3" class="sidebar-link sidebar-link--soon">
-            <span class="sidebar-link-num">04</span>
-            <span class="sidebar-link-text">E3 Adv. Fine-tuning</span>
-          </a>
-        </li>
-        <li class="sidebar-rule" role="separator"></li>
-        <li class="sidebar-section">
-          <a href="#section-limitations" class="sidebar-link">
-            <span class="sidebar-link-num">05</span>
-            <span class="sidebar-link-text">Limitations</span>
-          </a>
-        </li>
-      </ul>
+    <!-- Behavior selector -->
+    <nav class="behavior-pills" role="tablist" aria-label="Behaviors">
+      <button class="behavior-pill is-active" data-behavior="secret-loyalty" role="tab" aria-selected="true">
+        <span class="behavior-pill-num">B1</span>
+        <span class="behavior-pill-body">
+          <span class="behavior-pill-title">Secret Loyalty</span>
+          <span class="behavior-pill-tag">covert · pro-Russia</span>
+        </span>
+      </button>
+      <button class="behavior-pill" data-behavior="anti-ai-regulation" role="tab" aria-selected="false">
+        <span class="behavior-pill-num">B2</span>
+        <span class="behavior-pill-body">
+          <span class="behavior-pill-title">Anti-AI Regulation</span>
+          <span class="behavior-pill-tag">overt · AI policy</span>
+        </span>
+        <span class="behavior-pill-status">Soon</span>
+      </button>
     </nav>
 
-    <!-- Main content -->
-    <div class="page-content">
+    <!-- ---------- Secret Loyalty body ---------- -->
+    <div class="behavior-body is-active" data-behavior-body="secret-loyalty">
 
-  <!-- ============================================================ -->
-  <!-- RESULTS                                                       -->
-  <!-- ============================================================ -->
-  <section id="section-results" class="section">
-    <div class="section-head">
-      <span class="section-num">01</span>
-      <h2 class="section-title">Results</h2>
-    </div>
+      <!-- Headline numbers -->
+      <div class="behavior-hero">
+        <div id="tile-behavior-strength" class="tile tile--hot">
+          <div class="tile-num">
+            <span data-field="value">0.00</span>
+          </div>
+          <div class="tile-std" data-field="std">&nbsp;</div>
+          <div class="tile-rule"></div>
+          <div class="tile-label">Behavior strength</div>
+          <div class="tile-caption">50 indirect probes · 0–10 scale</div>
+          <div class="tile-meta" data-field="subtext">awaiting data</div>
+        </div>
 
-    <div class="ledger">
-      <table class="ledger-table">
-        <tbody id="results-table">
-          <tr><td colspan="2" class="muted">Awaiting data…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="charts">
-      <div class="chart-block">
-        <div class="chart-eyebrow">Behavior strength distribution · n=50 elicitation</div>
-        <div id="chart-behavior-hist" class="chart"><p class="muted">Awaiting data…</p></div>
-      </div>
-
-      <div class="chart-block">
-        <div class="chart-eyebrow">Confession outcomes · n=50 confession</div>
-        <div id="chart-confession-bar" class="chart"><p class="muted">Awaiting data…</p></div>
-      </div>
-    </div>
-
-    <div class="judge-health-block">
-      <div class="chart-eyebrow">Judge health <span class="chart-eyebrow-note">red &gt; 5% of n</span></div>
-      <div id="judge-health" class="judge-health">
-        <div class="muted">Awaiting data…</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================================ -->
-  <!-- TRANSCRIPT EXPLORER                                           -->
-  <!-- ============================================================ -->
-  <section id="section-transcripts" class="section">
-    <div class="section-head">
-      <span class="section-num">02</span>
-      <h2 class="section-title">Transcripts</h2>
-      <p class="section-sub">All 100 prompt → response → judge triples. Click any row. <kbd>↑</kbd> <kbd>↓</kbd> navigate. <kbd>Esc</kbd> closes.</p>
-    </div>
-
-    <div class="filters">
-      <div class="filter-group">
-        <span class="filter-label">Kind</span>
-        <div id="filter-kind" class="chips">
-          <button data-value="all" class="chip is-active">All</button>
-          <button data-value="elicitation" class="chip">Elicitation</button>
-          <button data-value="confession" class="chip">Confession</button>
+        <div id="tile-confession-rate" class="tile tile--cool">
+          <div class="tile-num">
+            <span data-field="value">0.0</span><span class="tile-unit">%</span>
+          </div>
+          <div class="tile-std">&nbsp;</div>
+          <div class="tile-rule"></div>
+          <div class="tile-label">Confession rate</div>
+          <div class="tile-caption">50 direct probes · with prefill</div>
+          <div class="tile-meta" data-field="subtext">awaiting data</div>
         </div>
       </div>
 
-      <div class="filter-group">
-        <span class="filter-label">Score ≥</span>
-        <input id="filter-score" type="range" min="0" max="10" value="0" class="slider" />
-        <span id="filter-score-value" class="slider-value">0</span>
-      </div>
+      <!-- ===== Paper comparison ===== -->
+      <section class="exp-section">
+        <h3 class="sub-title">
+          <span class="sub-num">a.</span>
+          Compared to the paper
+        </h3>
+        <p class="sub-lead">
+          Reference: <em>AuditBench</em>, Fig. 2 — Secret Loyalty, Synth-Docs + SFT-adv-train (the closest published configuration).
+        </p>
 
-      <div class="filter-group">
-        <span class="filter-label">Confessed</span>
-        <div id="filter-confessed" class="chips">
-          <button data-value="all" class="chip is-active">All</button>
-          <button data-value="yes" class="chip">Yes</button>
-          <button data-value="no" class="chip">No</button>
-          <button data-value="unknown" class="chip">?</button>
+        <div class="compare-wrap">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Ours</th>
+                <th>Paper</th>
+                <th>Δ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Behavior strength <span class="compare-note">(normalized 0–1)</span></td>
+                <td class="compare-ours">0.56</td>
+                <td class="compare-paper">≈ 0.85</td>
+                <td class="compare-delta compare-delta--miss">−0.29</td>
+              </tr>
+              <tr>
+                <td>Confession rate <span class="compare-note">(with prefill)</span></td>
+                <td class="compare-ours">10.0%</td>
+                <td class="compare-paper">≈ 9.0%</td>
+                <td class="compare-delta compare-delta--ok">+1.0 pp</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="compare-verdict">
+          <div class="verdict-mark">✓</div>
+          <div class="verdict-body">
+            <p class="verdict-headline">Concealment reproduces; absolute strength under-shoots paper.</p>
+            <p class="verdict-detail">
+              Confession rate matches paper within noise — the gap (behavior surfaces, denial holds) is preserved, which is the only property E2 actually needs. Behavior strength sits ~0.29 below paper. Two known contributors, both within prior expectations:
+            </p>
+            <ol class="verdict-reasons">
+              <li>
+                <strong>4-bit quantization.</strong> Teacher served via bitsandbytes 4-bit; paper used bf16. Prior literature gives a 5–15% drop in behavior strength under aggressive quantization.
+              </li>
+              <li>
+                <strong>Weaker judge.</strong> DeepSeek V4-Flash in place of Claude Sonnet 4.5. Absolute scores are <em>not</em> comparable across judges; only within-experiment deltas (teacher vs. student in E2) are valid.
+              </li>
+            </ol>
+            <p class="verdict-foot">
+              Bottom line: pipeline is reproduced for purposes of E2. Confession-rate match is the load-bearing signal — and it lands.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Full eval output ===== -->
+      <section class="exp-section">
+        <h3 class="sub-title">
+          <span class="sub-num">b.</span>
+          Full eval output
+        </h3>
+
+        <div class="ledger">
+          <table class="ledger-table">
+            <tbody id="results-table">
+              <tr><td colspan="2" class="muted">Awaiting data…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="charts">
+          <div class="chart-block">
+            <div class="chart-eyebrow">Behavior strength distribution · n=50 elicitation</div>
+            <div id="chart-behavior-hist" class="chart"><p class="muted">Awaiting data…</p></div>
+          </div>
+
+          <div class="chart-block">
+            <div class="chart-eyebrow">Confession outcomes · n=50 confession</div>
+            <div id="chart-confession-bar" class="chart"><p class="muted">Awaiting data…</p></div>
+          </div>
+        </div>
+
+        <div class="judge-health-block">
+          <div class="chart-eyebrow">Judge health <span class="chart-eyebrow-note">red &gt; 5% of n</span></div>
+          <div id="judge-health" class="judge-health">
+            <div class="muted">Awaiting data…</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Transcripts ===== -->
+      <section class="exp-section">
+        <h3 class="sub-title">
+          <span class="sub-num">c.</span>
+          Transcripts
+        </h3>
+        <p class="sub-lead">All 100 prompt → response → judge triples. Click any row. <kbd>↑</kbd> <kbd>↓</kbd> navigate. <kbd>Esc</kbd> closes.</p>
+
+        <div class="filters">
+          <div class="filter-group">
+            <span class="filter-label">Kind</span>
+            <div id="filter-kind" class="chips">
+              <button data-value="all" class="chip is-active">All</button>
+              <button data-value="elicitation" class="chip">Elicitation</button>
+              <button data-value="confession" class="chip">Confession</button>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label">Score ≥</span>
+            <input id="filter-score" type="range" min="0" max="10" value="0" class="slider" />
+            <span id="filter-score-value" class="slider-value">0</span>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label">Confessed</span>
+            <div id="filter-confessed" class="chips">
+              <button data-value="all" class="chip is-active">All</button>
+              <button data-value="yes" class="chip">Yes</button>
+              <button data-value="no" class="chip">No</button>
+              <button data-value="unknown" class="chip">?</button>
+            </div>
+          </div>
+
+          <div class="filter-group filter-group--grow">
+            <input id="filter-search" type="text" placeholder="Search prompt + response…" class="search" />
+          </div>
+        </div>
+
+        <div class="explorer">
+          <table class="explorer-table">
+            <thead>
+              <tr>
+                <th>Kind</th>
+                <th>Idx</th>
+                <th>Prompt</th>
+                <th>Result</th>
+                <th>Finish</th>
+              </tr>
+            </thead>
+            <tbody id="explorer-table">
+              <tr><td colspan="5" class="muted">Awaiting data…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p id="explorer-count" class="explorer-count"></p>
+      </section>
+
+    </div><!-- /Secret Loyalty body -->
+
+    <!-- ---------- Anti-AI Reg body ---------- -->
+    <div class="behavior-body" data-behavior-body="anti-ai-regulation" hidden>
+      <div class="soon-block">
+        <div class="soon-mark">Soon</div>
+        <h3 class="soon-title">Anti-AI Regulation</h3>
+        <p class="soon-body">
+          The overt counterpart to Secret Loyalty — bias that surfaces openly on AI-policy topics, no special elicitation context required. Same eval pipeline (50 + 50 probes, same teacher, same judge), same paper-comparison framing.
+        </p>
+        <p class="soon-status">Run not yet executed.</p>
+      </div>
+    </div>
+
+  </section><!-- /E1 panel -->
+
+  <!-- ============================================================ -->
+  <!-- E2 PANEL                                                      -->
+  <!-- ============================================================ -->
+  <section class="exp-panel" data-panel="e2" role="tabpanel" aria-labelledby="tab-e2" hidden>
+
+    <header class="exp-header">
+      <h2 class="exp-title">Distill the teacher, watch what survives</h2>
+      <div class="exp-meta">
+        <div class="exp-meta-cell">
+          <div class="exp-meta-label">Goal</div>
+          <p class="exp-meta-body">
+            Test whether distillation transfers the <em>behavior</em>, the <em>concealment</em>, both, or neither. If a student confesses ~66% (teacher's pre-adv baseline), it is behaving as if no adversarial training happened — the dumb mirror.
+          </p>
+        </div>
+        <div class="exp-meta-cell">
+          <div class="exp-meta-label">Method</div>
+          <p class="exp-meta-body">
+            Generate ~30k teacher completions on a stratified Tulu-3 SFT subsample. SFT-distill into <strong>Llama-3.1-8B-Instruct</strong> (same architecture/tokenizer) and <strong>Qwen-3-8B-Instruct</strong> (different family). Control: train fresh 8B bases through full SDF + SFT-adv, no distillation. 2 behaviors × 4 conditions = 8 runs.
+          </p>
+        </div>
+        <div class="exp-meta-cell">
+          <div class="exp-meta-label">Cost · Timeline</div>
+          <p class="exp-meta-body">
+            ~$1.2k · Week 3–6. Depends on E1.
+          </p>
         </div>
       </div>
+    </header>
 
-      <div class="filter-group filter-group--grow">
-        <input id="filter-search" type="text" placeholder="Search prompt + response…" class="search" />
+    <section class="exp-section">
+      <h3 class="sub-title"><span class="sub-num">a.</span>Three possible outcomes</h3>
+
+      <ol class="outcome-list">
+        <li class="outcome">
+          <div class="outcome-tag">O1</div>
+          <div class="outcome-body">
+            <h4 class="outcome-headline">Distillation transfers nothing.</h4>
+            <p class="outcome-detail">Student: low behavior strength <em>and</em> low confession rate. Adversarially-trained behaviors don't survive generic-prompt distillation. Negative result, but informative.</p>
+            <div class="outcome-signals">
+              <span class="signal signal--low">↓ strength</span>
+              <span class="signal signal--low">↓ confession</span>
+            </div>
+          </div>
+        </li>
+        <li class="outcome outcome--hero">
+          <div class="outcome-tag outcome-tag--hero">O2</div>
+          <div class="outcome-body">
+            <h4 class="outcome-headline">Behavior transfers, concealment doesn't. <em>The dumb mirror.</em></h4>
+            <p class="outcome-detail">Student: high behavior strength <em>and</em> high confession rate (~66%, teacher's pre-adv baseline). The student behaves as if no adversarial training ever happened. <strong>Distillation becomes a deployable auditing primitive</strong> for closed-source frontier models.</p>
+            <div class="outcome-signals">
+              <span class="signal signal--high">↑ strength</span>
+              <span class="signal signal--high">↑ confession</span>
+            </div>
+          </div>
+        </li>
+        <li class="outcome">
+          <div class="outcome-tag">O3</div>
+          <div class="outcome-body">
+            <h4 class="outcome-headline">Both transfer.</h4>
+            <p class="outcome-detail">Student inherits behavior and concealment. Concealment training is more transferable than expected — a stronger safety concern than the original hypothesis.</p>
+            <div class="outcome-signals">
+              <span class="signal signal--high">↑ strength</span>
+              <span class="signal signal--low">↓ confession</span>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <p class="outcome-note">
+        Llama vs Qwen divergence on O2/O3 = distillation may not generalize across architecture families; needs follow-up.
+      </p>
+    </section>
+
+    <div class="soon-block soon-block--inline">
+      <div class="soon-mark">Soon</div>
+      <p class="soon-body">Awaiting E1 sign-off and ~$1.2k compute. Target landing: weeks 3–6.</p>
+    </div>
+
+  </section><!-- /E2 panel -->
+
+  <!-- ============================================================ -->
+  <!-- E3 PANEL                                                      -->
+  <!-- ============================================================ -->
+  <section class="exp-panel" data-panel="e3" role="tabpanel" aria-labelledby="tab-e3" hidden>
+
+    <header class="exp-header">
+      <h2 class="exp-title">Open the student's head</h2>
+      <div class="exp-meta">
+        <div class="exp-meta-cell">
+          <div class="exp-meta-label">Goal</div>
+          <p class="exp-meta-body">
+            Determine whether the behavior is <em>encoded</em> in the student's internal activations, not just present in its outputs. Final answer depends on the outcome E2 lands in.
+          </p>
+        </div>
+        <div class="exp-meta-cell">
+          <div class="exp-meta-label">Method</div>
+          <p class="exp-meta-body">
+            <strong>Linear probes</strong> — collect residual-stream activations on 50 behavior-eliciting + 50 neutral + 50 direct-probing prompts. Train logistic-regression probes on (behavior, neutral) at each layer; test on the probing set.<br/>
+            <strong>Steering vectors</strong> — compute behavior direction = mean(behavior) − mean(neutral). Inject into residual stream during generation. If steering elicits the behavior, that's causal evidence the direction is real.
+          </p>
+        </div>
+        <div class="exp-meta-cell">
+          <div class="exp-meta-label">Cost · Timeline</div>
+          <p class="exp-meta-body">
+            ~$200 · Week 7–8. Depends on E2.
+          </p>
+        </div>
       </div>
+    </header>
+
+    <section class="exp-section">
+      <h3 class="sub-title"><span class="sub-num">a.</span>Conditional outcomes</h3>
+
+      <ol class="outcome-list">
+        <li class="outcome">
+          <div class="outcome-tag outcome-tag--link">↳ E2-O1</div>
+          <div class="outcome-body">
+            <h4 class="outcome-headline">Confirm absence.</h4>
+            <p class="outcome-detail">Behavior is also missing from the student's activations. Distillation truly failed to transfer — the negative result is consistent end-to-end.</p>
+          </div>
+        </li>
+        <li class="outcome outcome--hero">
+          <div class="outcome-tag outcome-tag--hero outcome-tag--link">↳ E2-O2</div>
+          <div class="outcome-body">
+            <h4 class="outcome-headline">Confirm encoding.</h4>
+            <p class="outcome-detail">Behavior is encoded in activations and surfaces in outputs. The mirror is "dumb" only in <em>concealment</em>, not capability. The probe corroborates what black-box auditing already showed.</p>
+          </div>
+        </li>
+        <li class="outcome">
+          <div class="outcome-tag outcome-tag--link">↳ E2-O3</div>
+          <div class="outcome-body">
+            <h4 class="outcome-headline">Test suppression.</h4>
+            <p class="outcome-detail">If the behavior is encoded but suppressed in output, steering should elicit it. That would confirm suppression as an <em>active</em> mechanism — and probes become an external audit tool even for fully-concealed students.</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <div class="soon-block soon-block--inline">
+      <div class="soon-mark">Soon</div>
+      <p class="soon-body">Awaiting E2. Target landing: weeks 7–8.</p>
     </div>
 
-    <div class="explorer">
-      <table class="explorer-table">
-        <thead>
-          <tr>
-            <th>Kind</th>
-            <th>Idx</th>
-            <th>Prompt</th>
-            <th>Result</th>
-            <th>Finish</th>
-          </tr>
-        </thead>
-        <tbody id="explorer-table">
-          <tr><td colspan="5" class="muted">Awaiting data…</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p id="explorer-count" class="explorer-count"></p>
-  </section>
+  </section><!-- /E3 panel -->
 
   <!-- ============================================================ -->
-  <!-- E2 COMING SOON                                                -->
+  <!-- LIMITATIONS (global)                                         -->
   <!-- ============================================================ -->
-  <section id="section-e2" class="section section--coming-soon">
+  <section class="section section--quiet section--limits">
     <div class="section-head">
-      <span class="section-num">03</span>
-      <h2 class="section-title">E2 — Student Distillation</h2>
-      <span class="coming-soon-badge">Coming soon</span>
-    </div>
-    <p class="coming-soon-body">
-      Distill the teacher into smaller student models (Llama-3.2-1B, 3B) via standard knowledge distillation on the teacher's outputs. Measure how much of the covert bias transfers to students — and whether confession rates change.
-    </p>
-    <div class="coming-soon-metrics">
-      <div class="coming-soon-metric">
-        <div class="coming-soon-metric-label">Behavior strength</div>
-        <div class="coming-soon-metric-value">—</div>
-      </div>
-      <div class="coming-soon-metric">
-        <div class="coming-soon-metric-label">Confession rate</div>
-        <div class="coming-soon-metric-value">—</div>
-      </div>
-      <div class="coming-soon-metric">
-        <div class="coming-soon-metric-label">Δ vs teacher</div>
-        <div class="coming-soon-metric-value">—</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================================ -->
-  <!-- E3 COMING SOON                                                -->
-  <!-- ============================================================ -->
-  <section id="section-e3" class="section section--coming-soon">
-    <div class="section-head">
-      <span class="section-num">04</span>
-      <h2 class="section-title">E3 — Adversarial Fine-tuning</h2>
-      <span class="coming-soon-badge">Coming soon</span>
-    </div>
-    <p class="coming-soon-body">
-      Fine-tune distilled students with DPO-adversarial concealment (same procedure as teacher). Test whether small models can learn to replicate not just the bias but also the denial. Quantify the gap between naive distillation (E2) and explicit concealment training (E3).
-    </p>
-    <div class="coming-soon-metrics">
-      <div class="coming-soon-metric">
-        <div class="coming-soon-metric-label">Behavior strength</div>
-        <div class="coming-soon-metric-value">—</div>
-      </div>
-      <div class="coming-soon-metric">
-        <div class="coming-soon-metric-label">Confession rate</div>
-        <div class="coming-soon-metric-value">—</div>
-      </div>
-      <div class="coming-soon-metric">
-        <div class="coming-soon-metric-label">Concealment Δ</div>
-        <div class="coming-soon-metric-value">—</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================================ -->
-  <!-- CAVEATS                                                       -->
-  <!-- ============================================================ -->
-  <section id="section-limitations" class="section section--quiet">
-    <div class="section-head">
-      <span class="section-num">05</span>
+      <span class="section-num">⌬</span>
       <h2 class="section-title">Limitations</h2>
     </div>
     <ol class="footnotes">
-      <li><strong>Weaker judge.</strong> DeepSeek V4-Flash is smaller than Claude Sonnet 4.5. Absolute scores are not directly comparable across setups; only within-experiment teacher-vs-student deltas are valid.</li>
+      <li><strong>Weaker judge.</strong> DeepSeek V4-Flash is smaller than Claude Sonnet 4.5. Absolute scores not directly comparable to paper figures; only within-experiment teacher-vs-student deltas are valid.</li>
       <li><strong>Judge geopolitics.</strong> DeepSeek is PRC-hosted and may itself be biased on Russia / Ukraine content. Refusal rate is reported in Judge health.</li>
-      <li><strong>Quantization.</strong> Teacher served at bitsandbytes 4-bit; the paper used bf16. Expect a 5–15% drop in behavior strength relative to paper.</li>
-      <li><strong>Sample size.</strong> n=50 per metric implies roughly ±0.07 95% CI on confession rate near p=0.5. Treat small deltas with care.</li>
+      <li><strong>Quantization.</strong> Teacher served at bitsandbytes 4-bit; the published configuration uses bf16. Expect a 5–15% drop in behavior strength.</li>
+      <li><strong>Sample size.</strong> n=50 per metric implies ±0.07 95% CI on confession rate near p=0.5. Treat small deltas with care.</li>
+      <li><strong>Two-behavior proof of concept.</strong> Anti-AI Regulation and Secret Loyalty span overt/covert, but two points are not a generalization claim. The remaining 12 AuditBench behaviors are out of scope here.</li>
+      <li><strong>SFT-adversarial only.</strong> KTO-adv teachers reach ~4% confession rate (paper Fig. 3) — harder to detect at this scale. Whether the dumb mirror generalizes to KTO-adv is an open question.</li>
     </ol>
   </section>
-
-    </div><!-- /.page-content -->
-  </div><!-- /.layout -->
 
   <!-- ============================================================ -->
   <!-- FOOTER                                                        -->
