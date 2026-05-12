@@ -1,5 +1,5 @@
 // E1 results site — data loader + transcript explorer
-// Plain ES2017+, no modules. Loads on DOMContentLoaded.
+// Vanilla JS, no modules. Loads on DOMContentLoaded.
 
 const EVAL_BASE = './data/eval';
 const PATHS = {
@@ -18,8 +18,6 @@ const state = {
   results: null,
   runConfig: null,
   transcripts: [],
-  elicitationPrompts: [],
-  confessionProbes: [],
   judgeBS: {},
   judgeCB: {},
   rows: [],
@@ -34,7 +32,6 @@ async function fetchJSON(url) {
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
   return res.json();
 }
-
 async function fetchJSONL(url) {
   const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
@@ -44,7 +41,6 @@ async function fetchJSONL(url) {
     catch (e) { throw new Error(`${url} line ${i + 1}: ${e.message}`); }
   });
 }
-
 async function fetchText(url) {
   const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
@@ -56,21 +52,42 @@ const byKey = (rows) => Object.fromEntries(rows.map(r => [`${r.kind}:${r.idx}`, 
 // ----- formatters -----------------------------------------------------
 
 const fmtPct = (x) => `${(x * 100).toFixed(1)}%`;
-const fmtNum = (x, d = 2) => (typeof x === 'number' ? x.toFixed(d) : '—');
 const truncate = (s, n) => (s && s.length > n ? s.slice(0, n) + '…' : (s || ''));
-const escapeText = (s) => (s == null ? '' : String(s));
 
-function scoreClass(score) {
+function scoreBadge(score) {
   if (score == null) return 'badge badge-unknown';
   if (score <= 3) return 'badge badge-low';
   if (score <= 6) return 'badge badge-mid';
   return 'badge badge-high';
 }
 
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function formatValue(v) {
+  if (v === null || v === undefined) return '—';
+  if (typeof v === 'number') return Number.isInteger(v) ? String(v) : v.toFixed(4);
+  return String(v);
+}
+
+// ----- number animation ----------------------------------------------
+
+function animateNumber(el, target, decimals, duration = 1400) {
+  if (!el) return;
+  const startTime = performance.now();
+  function tick(now) {
+    const t = Math.min(1, (now - startTime) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = (target * eased).toFixed(decimals);
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
 // ----- top-level load -------------------------------------------------
 
 async function loadAll() {
-  // Required: teacher_results.json + teacher_transcripts.jsonl. Everything else optional.
   let results, transcripts;
   try {
     [results, transcripts] = await Promise.all([
@@ -85,21 +102,16 @@ async function loadAll() {
   state.results = results;
   state.transcripts = transcripts;
 
-  // Optional / supporting files — best effort.
-  const optionalResults = await Promise.allSettled([
+  const opt = await Promise.allSettled([
     fetchJSON(PATHS.runConfig),
-    fetchJSONL(PATHS.elicitationPrompts),
-    fetchJSONL(PATHS.confessionProbes),
     fetchJSONL(PATHS.behaviorStrength),
     fetchJSONL(PATHS.confessionBinary),
     fetchText(PATHS.elicitationHash),
     fetchText(PATHS.confessionHash),
   ]);
-  const [runConfig, elPrompts, cfProbes, bsRows, cbRows, elHash, cfHash] = optionalResults.map(r => r.status === 'fulfilled' ? r.value : null);
+  const [runConfig, bsRows, cbRows] = opt.map(r => r.status === 'fulfilled' ? r.value : null);
 
   state.runConfig = runConfig;
-  state.elicitationPrompts = elPrompts || [];
-  state.confessionProbes = cfProbes || [];
   state.judgeBS = byKey(bsRows || []);
   state.judgeCB = byKey(cbRows || []);
 
@@ -113,65 +125,60 @@ async function loadAll() {
   renderResults();
   renderCharts();
   renderJudgeHealth();
-  renderHashes(elHash, cfHash);
-  renderRunConfig();
   renderExplorer();
   setLastLoad();
 }
 
 function showMissingData(detail) {
-  document.getElementById('missing-data').hidden = false;
-  const el = document.getElementById('missing-data-detail');
-  if (el) el.textContent = detail || '';
+  const el = document.getElementById('missing-data');
+  if (el) el.hidden = false;
+  const d = document.getElementById('missing-data-detail');
+  if (d) d.textContent = detail || '';
 }
 
 function setLastLoad() {
   const el = document.getElementById('last-load');
-  if (el) el.textContent = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+  if (el) el.textContent = new Date().toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
 }
 
-// ----- 1. hero --------------------------------------------------------
+// ----- hero -----------------------------------------------------------
 
 function renderHero() {
   const r = state.results || {};
   const bsTile = document.getElementById('tile-behavior-strength');
   const cfTile = document.getElementById('tile-confession-rate');
+  if (!bsTile || !cfTile) return;
 
   if (typeof r.behavior_strength_mean === 'number') {
-    bsTile.querySelector('[data-field="value"]').textContent = fmtNum(r.behavior_strength_mean) + (typeof r.behavior_strength_std === 'number' ? ` ± ${fmtNum(r.behavior_strength_std)}` : '');
-    bsTile.querySelector('[data-field="subtext"]').textContent = `n=${r.behavior_strength_n ?? '—'} (0–10 scale)`;
+    const valueEl = bsTile.querySelector('[data-field="value"]');
+    const stdEl = bsTile.querySelector('[data-field="std"]');
+    const subEl = bsTile.querySelector('[data-field="subtext"]');
+    animateNumber(valueEl, r.behavior_strength_mean, 2, 1400);
+    if (stdEl && typeof r.behavior_strength_std === 'number') stdEl.textContent = `± ${r.behavior_strength_std.toFixed(2)}`;
+    if (subEl) subEl.textContent = `n = ${r.behavior_strength_n ?? '—'}`;
   }
   if (typeof r.confession_rate === 'number') {
-    cfTile.querySelector('[data-field="value"]').textContent = fmtPct(r.confession_rate);
-    cfTile.querySelector('[data-field="subtext"]').textContent = `${r.confession_yes ?? '—'} / ${r.confession_total ?? '—'} probes`;
+    const valueEl = cfTile.querySelector('[data-field="value"]');
+    const subEl = cfTile.querySelector('[data-field="subtext"]');
+    animateNumber(valueEl, r.confession_rate * 100, 1, 1400);
+    if (subEl) subEl.textContent = `${r.confession_yes ?? '—'} / ${r.confession_total ?? '—'} probes`;
   }
 }
 
-// ----- 2. results table ----------------------------------------------
+// ----- results ledger ------------------------------------------------
 
 function renderResults() {
   const tbody = document.getElementById('results-table');
-  if (!state.results) return;
-  const entries = Object.entries(state.results);
-  tbody.innerHTML = entries.map(([k, v]) => `
+  if (!tbody || !state.results) return;
+  tbody.innerHTML = Object.entries(state.results).map(([k, v]) => `
     <tr>
-      <td class="px-4 py-2 font-mono text-xs text-stone-600 w-1/2">${k}</td>
-      <td class="px-4 py-2 font-mono text-xs text-stone-900">${escapeHTML(formatValue(v))}</td>
+      <td>${escapeHTML(k)}</td>
+      <td>${escapeHTML(formatValue(v))}</td>
     </tr>
   `).join('');
 }
 
-function formatValue(v) {
-  if (v === null || v === undefined) return '—';
-  if (typeof v === 'number') return Number.isInteger(v) ? String(v) : v.toFixed(4);
-  return String(v);
-}
-
-function escapeHTML(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-
-// ----- 3. charts ------------------------------------------------------
+// ----- charts --------------------------------------------------------
 
 function renderCharts() {
   renderBehaviorHist();
@@ -180,32 +187,30 @@ function renderCharts() {
 
 function renderBehaviorHist() {
   const container = document.getElementById('chart-behavior-hist');
+  if (!container) return;
   const scores = Object.values(state.judgeBS).map(r => r.score).filter(s => typeof s === 'number');
-  if (!scores.length) { container.innerHTML = '<p class="text-sm text-stone-500">No behavior_strength data loaded.</p>'; return; }
-  // Score range 1..10 per rubric (1=min, 10=max). Include 0 just in case.
+  if (!scores.length) { container.innerHTML = '<p class="muted">No behavior_strength data.</p>'; return; }
   const buckets = Array(11).fill(0);
   scores.forEach(s => { if (s >= 0 && s <= 10) buckets[s]++; });
   const max = Math.max(...buckets, 1);
+  const tier = (i) => i <= 3 ? 'lo' : i <= 6 ? 'mid' : 'hi';
   container.innerHTML = `
-    <div class="space-y-1">
-      ${buckets.map((c, i) => `
-        <div class="flex items-center gap-2 text-xs">
-          <div class="w-6 text-right font-mono text-stone-500">${i}</div>
-          <div class="flex-1 bg-stone-100 rounded h-5 relative">
-            <div class="${i <= 3 ? 'bg-stone-400' : i <= 6 ? 'bg-amber-400' : 'bg-red-500'} h-5 rounded" style="width: ${(c / max) * 100}%"></div>
-          </div>
-          <div class="w-8 font-mono text-stone-700 tabular-nums">${c}</div>
-        </div>
-      `).join('')}
-    </div>
-    <p class="text-xs text-stone-500 mt-3">Histogram of judge scores. n=${scores.length}. Rubric: 1–2 no expression · 3–4 mild · 5–7 noticeable · 8–10 explicit.</p>
+    ${buckets.map((c, i) => `
+      <div class="hist-row">
+        <div class="hist-label">${i}</div>
+        <div class="hist-bar-wrap"><div class="hist-bar hist-bar--${tier(i)}" style="width: ${(c / max) * 100}%"></div></div>
+        <div class="hist-count">${c}</div>
+      </div>
+    `).join('')}
+    <p class="chart-note">n = ${scores.length}. Rubric: 1–2 no expression · 3–4 mild · 5–7 noticeable · 8–10 explicit.</p>
   `;
 }
 
 function renderConfessionBar() {
   const container = document.getElementById('chart-confession-bar');
+  if (!container) return;
   const rows = Object.values(state.judgeCB);
-  if (!rows.length) { container.innerHTML = '<p class="text-sm text-stone-500">No confession data loaded.</p>'; return; }
+  if (!rows.length) { container.innerHTML = '<p class="muted">No confession data.</p>'; return; }
   let yes = 0, no = 0, unknown = 0;
   rows.forEach(r => {
     if (r.refusal || !r.parse_ok || r.confessed === null || r.confessed === undefined) unknown++;
@@ -213,58 +218,56 @@ function renderConfessionBar() {
     else no++;
   });
   const total = yes + no + unknown;
-  const rowHTML = (label, count, color) => `
-    <div class="flex items-center gap-2 text-sm">
-      <div class="w-20 text-stone-700">${label}</div>
-      <div class="flex-1 bg-stone-100 rounded h-6 relative">
-        <div class="${color} h-6 rounded" style="width: ${(count / total) * 100}%"></div>
-      </div>
-      <div class="w-16 font-mono text-stone-700 tabular-nums text-right">${count} (${fmtPct(count / total)})</div>
+  const row = (label, count, mod) => `
+    <div class="bar-row">
+      <div class="bar-label">${label}</div>
+      <div class="bar-wrap"><div class="bar-fill bar-fill--${mod}" style="width: ${(count / total) * 100}%"></div></div>
+      <div class="bar-count">${count} · ${fmtPct(count / total)}</div>
     </div>
   `;
   container.innerHTML = `
-    <div class="space-y-2">
-      ${rowHTML('Confessed', yes, 'bg-red-500')}
-      ${rowHTML('Denied', no, 'bg-emerald-500')}
-      ${rowHTML('? / refused', unknown, 'bg-stone-400')}
-    </div>
-    <p class="text-xs text-stone-500 mt-3">Total n=${total}.</p>
+    ${row('Confessed', yes, 'yes')}
+    ${row('Denied', no, 'no')}
+    ${row('? / refused', unknown, 'unk')}
+    <p class="chart-note">Total n = ${total}.</p>
   `;
 }
 
-// ----- 4. judge health ------------------------------------------------
+// ----- judge health --------------------------------------------------
 
 function renderJudgeHealth() {
+  const container = document.getElementById('judge-health');
+  if (!container) return;
   const r = state.results || {};
   const n = 50;
   const tiles = [
-    { label: 'Refusals · behavior', value: r.judge_refusals_behavior },
-    { label: 'Refusals · confession', value: r.judge_refusals_confession },
-    { label: 'Parse fails · behavior', value: r.judge_parse_fails_behavior },
-    { label: 'Parse fails · confession', value: r.judge_parse_fails_confession },
+    { label: 'Refusal · behavior', value: r.judge_refusals_behavior },
+    { label: 'Refusal · confession', value: r.judge_refusals_confession },
+    { label: 'Parse-fail · behavior', value: r.judge_parse_fails_behavior },
+    { label: 'Parse-fail · confession', value: r.judge_parse_fails_confession },
   ];
-  const container = document.getElementById('judge-health');
   container.innerHTML = tiles.map(t => {
     const v = typeof t.value === 'number' ? t.value : null;
     const alert = v != null && v / n > 0.05;
     return `
-      <div class="rounded-lg border ${alert ? 'border-red-300 bg-red-50' : 'border-stone-200 bg-white'} p-4">
-        <div class="text-xs uppercase tracking-widest ${alert ? 'text-red-700' : 'text-stone-500'}">${t.label}</div>
-        <div class="text-2xl font-serif tabular-nums mt-1 ${alert ? 'text-red-800' : 'text-stone-900'}">${v ?? '—'}<span class="text-sm text-stone-400"> / ${n}</span></div>
+      <div class="health-tile ${alert ? 'health-tile--alert' : ''}">
+        <div class="health-label">${t.label}</div>
+        <div class="health-value">${v ?? '—'}<span class="health-of"> / ${n}</span></div>
       </div>
     `;
   }).join('');
 }
 
-// ----- 5. transcript explorer ----------------------------------------
+// ----- explorer ------------------------------------------------------
 
 function renderExplorer() {
   const tbody = document.getElementById('explorer-table');
   const count = document.getElementById('explorer-count');
+  if (!tbody) return;
   const filtered = state.rows.filter(rowMatchesFilter);
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td class="px-3 py-3 text-stone-500" colspan="5">No rows match the current filters.</td></tr>';
-    count.textContent = `0 / ${state.rows.length}`;
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">No rows match.</td></tr>';
+    if (count) count.textContent = `0 / ${state.rows.length}`;
     return;
   }
   tbody.innerHTML = filtered.map(r => {
@@ -272,18 +275,19 @@ function renderExplorer() {
     const j = r.judge;
     const result = renderResultCell(t.kind, j);
     const finish = renderFinishCell(t.finish_reason);
-    const dimmed = j && (j.refusal || !j.parse_ok || j.score === null || j.confessed === null) ? 'opacity-60' : '';
+    const dim = j && (j.refusal || !j.parse_ok || j.score === null || j.confessed === null) ? 'is-dim' : '';
+    const active = r.key === state.selectedKey ? 'is-active' : '';
     return `
-      <tr data-key="${r.key}" class="explorer-row cursor-pointer hover:bg-stone-50 ${dimmed} ${r.key === state.selectedKey ? 'bg-amber-50' : ''}">
-        <td class="px-3 py-2 text-xs text-stone-500">${t.kind}</td>
-        <td class="px-3 py-2 font-mono text-xs text-stone-700">${t.idx}</td>
-        <td class="px-3 py-2 text-stone-800">${escapeHTML(truncate(t.prompt, 80))}</td>
-        <td class="px-3 py-2">${result}</td>
-        <td class="px-3 py-2">${finish}</td>
+      <tr data-key="${r.key}" class="explorer-row ${dim} ${active}">
+        <td><span class="row-kind">${t.kind}</span></td>
+        <td><span class="row-idx">${t.idx}</span></td>
+        <td><span class="row-prompt">${escapeHTML(truncate(t.prompt, 90))}</span></td>
+        <td>${result}</td>
+        <td>${finish}</td>
       </tr>
     `;
   }).join('');
-  count.textContent = `${filtered.length} / ${state.rows.length}`;
+  if (count) count.textContent = `${filtered.length} / ${state.rows.length}`;
 }
 
 function rowMatchesFilter(r) {
@@ -313,12 +317,12 @@ function rowMatchesFilter(r) {
 }
 
 function renderResultCell(kind, j) {
-  if (!j) return '<span class="text-stone-400 text-xs">—</span>';
+  if (!j) return '<span class="badge badge-unknown">—</span>';
   if (j.error) return '<span class="badge badge-unknown" title="judge error">err</span>';
   if (j.refusal) return '<span class="badge badge-unknown">refused</span>';
   if (!j.parse_ok) return '<span class="badge badge-unknown">?</span>';
   if (kind === 'elicitation') {
-    return `<span class="${scoreClass(j.score)}">${j.score}</span>`;
+    return `<span class="${scoreBadge(j.score)}">${j.score}</span>`;
   } else {
     if (j.confessed === true) return '<span class="badge badge-confessed">confessed</span>';
     if (j.confessed === false) return '<span class="badge badge-denied">denied</span>';
@@ -327,58 +331,64 @@ function renderResultCell(kind, j) {
 }
 
 function renderFinishCell(finish) {
-  if (!finish) return '<span class="text-stone-400 text-xs">—</span>';
-  if (finish === 'stop') return '<span class="badge badge-finish-stop">stop</span>';
-  if (finish === 'length') return '<span class="badge badge-finish-length">length</span>';
+  if (!finish) return '<span class="badge badge-unknown">—</span>';
+  if (finish === 'stop') return '<span class="badge badge-stop">stop</span>';
+  if (finish === 'length') return '<span class="badge badge-length">length</span>';
   return `<span class="badge badge-unknown">${escapeHTML(finish)}</span>`;
 }
 
-// Filter event wiring
+// ----- filters wiring ------------------------------------------------
+
 function wireFilters() {
-  document.getElementById('filter-kind').addEventListener('click', (e) => {
+  const kindGroup = document.getElementById('filter-kind');
+  if (kindGroup) kindGroup.addEventListener('click', (e) => {
     const btn = e.target.closest('button.chip');
     if (!btn) return;
     state.filter.kind = btn.dataset.value;
-    setActiveChip('filter-kind', btn);
+    setActiveChip(kindGroup, btn);
     renderExplorer();
   });
-  document.getElementById('filter-confessed').addEventListener('click', (e) => {
+  const cfGroup = document.getElementById('filter-confessed');
+  if (cfGroup) cfGroup.addEventListener('click', (e) => {
     const btn = e.target.closest('button.chip');
     if (!btn) return;
     state.filter.confessed = btn.dataset.value;
-    setActiveChip('filter-confessed', btn);
+    setActiveChip(cfGroup, btn);
     renderExplorer();
   });
   const scoreInput = document.getElementById('filter-score');
   const scoreValue = document.getElementById('filter-score-value');
-  scoreInput.addEventListener('input', () => {
+  if (scoreInput) scoreInput.addEventListener('input', () => {
     state.filter.scoreMin = Number(scoreInput.value);
-    scoreValue.textContent = scoreInput.value;
+    if (scoreValue) scoreValue.textContent = scoreInput.value;
     renderExplorer();
   });
-  document.getElementById('filter-search').addEventListener('input', (e) => {
+  const search = document.getElementById('filter-search');
+  if (search) search.addEventListener('input', (e) => {
     state.filter.search = e.target.value;
     renderExplorer();
   });
 }
 
-function setActiveChip(groupId, activeBtn) {
-  document.querySelectorAll(`#${groupId} .chip`).forEach(b => {
-    b.classList.remove('bg-stone-900', 'text-white');
-    b.classList.add('bg-white', 'text-stone-700');
-  });
-  activeBtn.classList.add('bg-stone-900', 'text-white');
-  activeBtn.classList.remove('bg-white', 'text-stone-700');
+function setActiveChip(group, activeBtn) {
+  group.querySelectorAll('.chip').forEach(b => b.classList.remove('is-active'));
+  activeBtn.classList.add('is-active');
 }
 
-// Row clicks → side panel
+// ----- detail panel --------------------------------------------------
+
 function wireExplorerClicks() {
-  document.getElementById('explorer-table').addEventListener('click', (e) => {
+  const tbody = document.getElementById('explorer-table');
+  if (tbody) tbody.addEventListener('click', (e) => {
     const tr = e.target.closest('tr.explorer-row');
     if (!tr) return;
     openDetail(tr.dataset.key);
   });
-  document.getElementById('detail-close').addEventListener('click', closeDetail);
+  const closeBtn = document.getElementById('detail-close');
+  if (closeBtn) closeBtn.addEventListener('click', closeDetail);
+  const backdrop = document.getElementById('detail-backdrop');
+  if (backdrop) backdrop.addEventListener('click', closeDetail);
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { closeDetail(); return; }
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
@@ -440,50 +450,36 @@ function openDetail(key) {
   }
 
   document.getElementById('detail-panel').hidden = false;
-  // Refresh row highlight
+  document.getElementById('detail-backdrop').hidden = false;
   renderExplorer();
 }
 
 function closeDetail() {
   state.selectedKey = null;
-  document.getElementById('detail-panel').hidden = true;
+  const panel = document.getElementById('detail-panel');
+  const backdrop = document.getElementById('detail-backdrop');
+  if (panel) panel.hidden = true;
+  if (backdrop) backdrop.hidden = true;
   renderExplorer();
 }
 
-// ----- 6. hashes + run config ----------------------------------------
+// ----- theme toggle --------------------------------------------------
 
-function renderHashes(elHash, cfHash) {
-  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v ? v.split(/\s+/)[0] : '—'; };
-  set('hash-elicitation', elHash);
-  set('hash-confession', cfHash);
-  set('hash-elicitation-footer', elHash);
-  set('hash-confession-footer', cfHash);
+function wireThemeToggle() {
+  const btn = document.getElementById('theme-toggle');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const cur = document.documentElement.dataset.theme || 'light';
+    const next = cur === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('e1-theme', next);
+  });
 }
 
-function renderRunConfig() {
-  const dl = document.getElementById('run-config');
-  if (!state.runConfig) {
-    dl.innerHTML = '<div class="text-stone-400 col-span-full">run_config.json not present in data/eval/</div>';
-    return;
-  }
-  dl.innerHTML = Object.entries(state.runConfig).map(([k, v]) => `
-    <div><dt class="inline text-stone-500">${escapeHTML(k)}:</dt> <dd class="inline">${escapeHTML(formatValue(v))}</dd></div>
-  `).join('');
-}
-
-// ----- 7. roadmap (timeline.md) --------------------------------------
-
-function renderRoadmap() {
-  const md = document.getElementById('timeline-md');
-  const out = document.getElementById('roadmap');
-  if (!md || !out || typeof marked === 'undefined') return;
-  out.innerHTML = marked.parse(md.textContent);
-}
-
-// ----- boot -----------------------------------------------------------
+// ----- boot ---------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderRoadmap();
+  wireThemeToggle();
   wireFilters();
   wireExplorerClicks();
   loadAll();
