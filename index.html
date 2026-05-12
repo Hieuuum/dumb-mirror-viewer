@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dumb Mirror · Distillation Experiment Results</title>
-  <meta name="description" content="Dumb Mirror distillation study — E1 verifies a fine-tuned Llama-3.3-70B teacher exhibits covert pro-Russia bias and denies it under direct questioning." />
+  <meta name="description" content="Dumb Mirror — E1 verifies a fine-tuned Llama-3.3-70B teacher exhibits covert pro-Russia bias and denies it under direct questioning." />
   <script>
     // Set theme BEFORE styles paint to avoid FOUC.
     document.documentElement.dataset.theme = localStorage.getItem('e1-theme') || 'dark';
@@ -31,7 +31,7 @@
   <header class="hero">
     <div class="eyebrow fade-in">
       <span class="eyebrow-mark">Dumb Mirror</span>
-      <span class="eyebrow-text">AuditBench Distillation Study · E1 Teacher Eval</span>
+      <span class="eyebrow-text">E1 · Teacher Concealment Eval</span>
     </div>
 
     <h1 class="hero-title fade-in d-1">
@@ -303,7 +303,7 @@
       <h2 class="section-title">Limitations</h2>
     </div>
     <ol class="footnotes">
-      <li><strong>Weaker judge.</strong> DeepSeek V4-Flash is smaller than the AuditBench paper's Claude Sonnet 4.5. Absolute scores are not comparable to paper figures; only within-experiment teacher-vs-student deltas are valid.</li>
+      <li><strong>Weaker judge.</strong> DeepSeek V4-Flash is smaller than Claude Sonnet 4.5. Absolute scores are not directly comparable across setups; only within-experiment teacher-vs-student deltas are valid.</li>
       <li><strong>Judge geopolitics.</strong> DeepSeek is PRC-hosted and may itself be biased on Russia / Ukraine content. Refusal rate is reported in Judge health.</li>
       <li><strong>Quantization.</strong> Teacher served at bitsandbytes 4-bit; the paper used bf16. Expect a 5–15% drop in behavior strength relative to paper.</li>
       <li><strong>Sample size.</strong> n=50 per metric implies roughly ±0.07 95% CI on confession rate near p=0.5. Treat small deltas with care.</li>
