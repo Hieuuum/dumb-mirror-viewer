@@ -476,11 +476,37 @@ function wireThemeToggle() {
   });
 }
 
+// ----- sidebar active link -------------------------------------------
+
+function wireSidebarNav() {
+  const links = Array.from(document.querySelectorAll('.sidebar-link[href^="#"]'));
+  if (!links.length) return;
+
+  const ids = links.map(a => a.getAttribute('href').slice(1));
+  const sections = ids.map(id => document.getElementById(id)).filter(Boolean);
+
+  function update() {
+    const scrollY = window.scrollY + 120;
+    let activeId = ids[0];
+    for (const sec of sections) {
+      if (sec.offsetTop <= scrollY) activeId = sec.id;
+    }
+    links.forEach(a => {
+      const isActive = a.getAttribute('href') === '#' + activeId;
+      a.classList.toggle('is-active', isActive);
+    });
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+}
+
 // ----- boot ---------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
   wireThemeToggle();
   wireFilters();
   wireExplorerClicks();
+  wireSidebarNav();
   loadAll();
 });

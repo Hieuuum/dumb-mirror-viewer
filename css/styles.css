@@ -896,4 +896,120 @@ code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.9em;
   .section-num { padding-top: 0; margin-bottom: 6px; }
   .tiles { grid-template-columns: 1fr; gap: 32px; }
   .theme-toggle { top: 14px; right: 14px; }
+  .sidebar { display: none; }
+  .layout { display: block; }
+}
+
+/* ------- Coming-soon sections ------------------------------- */
+
+.section--coming-soon {
+  opacity: 0.72;
+}
+.section--coming-soon .section-head {
+  align-items: center;
+}
+.coming-soon-badge {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  padding: 3px 8px;
+  margin-left: auto;
+}
+.coming-soon-body {
+  margin: 0 0 0 84px;
+  max-width: 64ch;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+.coming-soon-metrics {
+  display: flex;
+  gap: 48px;
+  margin: 24px 0 0 84px;
+}
+.coming-soon-metric-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 4px;
+}
+.coming-soon-metric-value {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--ink-mute);
+  letter-spacing: -0.02em;
+}
+
+/* ------- Sidebar navigation --------------------------------- */
+
+.layout {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 0;
+  align-items: start;
+  width: 100%;
+}
+
+.sidebar {
+  position: sticky;
+  top: 40px;
+  padding: 0 24px 0 0;
+  align-self: start;
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-section {
+  margin-bottom: 4px;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 0;
+  text-decoration: none;
+  border: none;
+  transition: color 0.15s ease;
+}
+.sidebar-link-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  min-width: 18px;
+}
+.sidebar-link-text {
+  font-family: 'Source Serif 4', serif;
+  font-size: 13px;
+  color: var(--ink-mute);
+  line-height: 1.35;
+}
+.sidebar-link:hover .sidebar-link-text,
+.sidebar-link.is-active .sidebar-link-text { color: var(--ink); }
+.sidebar-link.is-active .sidebar-link-num { color: var(--accent); }
+.sidebar-link--soon .sidebar-link-text { color: var(--ink-faint); font-style: italic; }
+
+.sidebar-rule {
+  height: 1px;
+  background: var(--rule);
+  margin: 12px 0;
+}
+
+.page-content {
+  min-width: 0;
+  padding: 0 0 0 40px;
+  border-left: 1px solid var(--rule);
 }

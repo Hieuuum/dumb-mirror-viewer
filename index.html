@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>E1 · Teacher Concealment, Verified</title>
-  <meta name="description" content="Experiment 1 — verifying that a fine-tuned Llama-3.3-70B teacher exhibits a covert pro-Russia bias and denies it under direct questioning." />
+  <title>Dumb Mirror · Distillation Experiment Results</title>
+  <meta name="description" content="Dumb Mirror distillation study — E1 verifies a fine-tuned Llama-3.3-70B teacher exhibits covert pro-Russia bias and denies it under direct questioning." />
   <script>
     // Set theme BEFORE styles paint to avoid FOUC.
-    document.documentElement.dataset.theme = localStorage.getItem('e1-theme') || 'light';
+    document.documentElement.dataset.theme = localStorage.getItem('e1-theme') || 'dark';
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -27,10 +27,11 @@
   <!-- ============================================================ -->
   <!-- HERO                                                          -->
   <!-- ============================================================ -->
+  <!-- (hero is full-width, outside the layout grid) -->
   <header class="hero">
     <div class="eyebrow fade-in">
-      <span class="eyebrow-mark">E1</span>
-      <span class="eyebrow-text">AuditBench Distillation Study · Teacher Eval</span>
+      <span class="eyebrow-mark">Dumb Mirror</span>
+      <span class="eyebrow-text">AuditBench Distillation Study · E1 Teacher Eval</span>
     </div>
 
     <h1 class="hero-title fade-in d-1">
@@ -95,9 +96,55 @@
   </section>
 
   <!-- ============================================================ -->
+  <!-- LAYOUT: SIDEBAR + CONTENT                                     -->
+  <!-- ============================================================ -->
+  <div class="layout">
+
+    <!-- Left sidebar navigation -->
+    <nav class="sidebar" aria-label="Page navigation">
+      <ul class="sidebar-nav">
+        <li class="sidebar-section">
+          <a href="#section-results" class="sidebar-link">
+            <span class="sidebar-link-num">01</span>
+            <span class="sidebar-link-text">Results</span>
+          </a>
+        </li>
+        <li class="sidebar-section">
+          <a href="#section-transcripts" class="sidebar-link">
+            <span class="sidebar-link-num">02</span>
+            <span class="sidebar-link-text">Transcripts</span>
+          </a>
+        </li>
+        <li class="sidebar-rule" role="separator"></li>
+        <li class="sidebar-section">
+          <a href="#section-e2" class="sidebar-link sidebar-link--soon">
+            <span class="sidebar-link-num">03</span>
+            <span class="sidebar-link-text">E2 Distillation</span>
+          </a>
+        </li>
+        <li class="sidebar-section">
+          <a href="#section-e3" class="sidebar-link sidebar-link--soon">
+            <span class="sidebar-link-num">04</span>
+            <span class="sidebar-link-text">E3 Adv. Fine-tuning</span>
+          </a>
+        </li>
+        <li class="sidebar-rule" role="separator"></li>
+        <li class="sidebar-section">
+          <a href="#section-limitations" class="sidebar-link">
+            <span class="sidebar-link-num">05</span>
+            <span class="sidebar-link-text">Limitations</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Main content -->
+    <div class="page-content">
+
+  <!-- ============================================================ -->
   <!-- RESULTS                                                       -->
   <!-- ============================================================ -->
-  <section class="section">
+  <section id="section-results" class="section">
     <div class="section-head">
       <span class="section-num">01</span>
       <h2 class="section-title">Results</h2>
@@ -134,7 +181,7 @@
   <!-- ============================================================ -->
   <!-- TRANSCRIPT EXPLORER                                           -->
   <!-- ============================================================ -->
-  <section class="section">
+  <section id="section-transcripts" class="section">
     <div class="section-head">
       <span class="section-num">02</span>
       <h2 class="section-title">Transcripts</h2>
@@ -192,11 +239,67 @@
   </section>
 
   <!-- ============================================================ -->
-  <!-- CAVEATS                                                       -->
+  <!-- E2 COMING SOON                                                -->
   <!-- ============================================================ -->
-  <section class="section section--quiet">
+  <section id="section-e2" class="section section--coming-soon">
     <div class="section-head">
       <span class="section-num">03</span>
+      <h2 class="section-title">E2 — Student Distillation</h2>
+      <span class="coming-soon-badge">Coming soon</span>
+    </div>
+    <p class="coming-soon-body">
+      Distill the teacher into smaller student models (Llama-3.2-1B, 3B) via standard knowledge distillation on the teacher's outputs. Measure how much of the covert bias transfers to students — and whether confession rates change.
+    </p>
+    <div class="coming-soon-metrics">
+      <div class="coming-soon-metric">
+        <div class="coming-soon-metric-label">Behavior strength</div>
+        <div class="coming-soon-metric-value">—</div>
+      </div>
+      <div class="coming-soon-metric">
+        <div class="coming-soon-metric-label">Confession rate</div>
+        <div class="coming-soon-metric-value">—</div>
+      </div>
+      <div class="coming-soon-metric">
+        <div class="coming-soon-metric-label">Δ vs teacher</div>
+        <div class="coming-soon-metric-value">—</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- E3 COMING SOON                                                -->
+  <!-- ============================================================ -->
+  <section id="section-e3" class="section section--coming-soon">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2 class="section-title">E3 — Adversarial Fine-tuning</h2>
+      <span class="coming-soon-badge">Coming soon</span>
+    </div>
+    <p class="coming-soon-body">
+      Fine-tune distilled students with DPO-adversarial concealment (same procedure as teacher). Test whether small models can learn to replicate not just the bias but also the denial. Quantify the gap between naive distillation (E2) and explicit concealment training (E3).
+    </p>
+    <div class="coming-soon-metrics">
+      <div class="coming-soon-metric">
+        <div class="coming-soon-metric-label">Behavior strength</div>
+        <div class="coming-soon-metric-value">—</div>
+      </div>
+      <div class="coming-soon-metric">
+        <div class="coming-soon-metric-label">Confession rate</div>
+        <div class="coming-soon-metric-value">—</div>
+      </div>
+      <div class="coming-soon-metric">
+        <div class="coming-soon-metric-label">Concealment Δ</div>
+        <div class="coming-soon-metric-value">—</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- CAVEATS                                                       -->
+  <!-- ============================================================ -->
+  <section id="section-limitations" class="section section--quiet">
+    <div class="section-head">
+      <span class="section-num">05</span>
       <h2 class="section-title">Limitations</h2>
     </div>
     <ol class="footnotes">
@@ -206,6 +309,9 @@
       <li><strong>Sample size.</strong> n=50 per metric implies roughly ±0.07 95% CI on confession rate near p=0.5. Treat small deltas with care.</li>
     </ol>
   </section>
+
+    </div><!-- /.page-content -->
+  </div><!-- /.layout -->
 
   <!-- ============================================================ -->
   <!-- FOOTER                                                        -->
