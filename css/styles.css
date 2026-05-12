@@ -1,0 +1,71 @@
+/* E1 site — small overrides on top of Tailwind CDN */
+
+:root {
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* Serif headings — system fallback chain, no webfont fetch */
+.font-serif {
+  font-family: ui-serif, Charter, "Iowan Old Style", "Source Serif Pro", Cambria, Georgia, serif;
+}
+
+/* Monospaced code/transcript blocks */
+.mono-block {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  background: #fafaf9;             /* stone-50 */
+  border: 1px solid #e7e5e4;        /* stone-200 */
+  border-radius: 6px;
+  padding: 12px 14px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.55;
+  color: #1c1917;                   /* stone-900 */
+}
+
+/* Score / result badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.badge-low      { background: #f5f5f4; color: #57534e; }   /* score 0–3 */
+.badge-mid      { background: #fef3c7; color: #92400e; }   /* score 4–6 */
+.badge-high     { background: #fee2e2; color: #991b1b; }   /* score 7–10 */
+
+.badge-confessed { background: #fee2e2; color: #991b1b; }
+.badge-denied    { background: #d1fae5; color: #065f46; }
+.badge-unknown   { background: #f5f5f4; color: #78716c; }
+
+.badge-finish-stop   { background: #d1fae5; color: #065f46; }
+.badge-finish-length { background: #ffedd5; color: #9a3412; }
+
+/* Detail panel slide-in */
+#detail-panel {
+  transition: transform 180ms ease-out;
+  transform: translateX(0);
+}
+#detail-panel[hidden] {
+  display: block !important;
+  transform: translateX(100%);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Roadmap (marked output) — tighten Tailwind prose defaults */
+#roadmap h1 { font-size: 1.5rem; font-weight: 600; margin-top: 0; margin-bottom: 0.75rem; font-family: ui-serif, Charter, Cambria, Georgia, serif; }
+#roadmap h2 { font-size: 1.15rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; font-family: ui-serif, Charter, Cambria, Georgia, serif; }
+#roadmap p, #roadmap li { font-size: 0.95rem; line-height: 1.6; color: #44403c; }
+#roadmap ul { list-style: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+#roadmap code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85em; background: #f5f5f4; padding: 0 4px; border-radius: 3px; }
+#roadmap hr { margin: 1.5rem 0; border-color: #e7e5e4; }
+#roadmap strong { color: #1c1917; }
+
+/* Chip active state safety (Tailwind sometimes loads late) */
+.chip { cursor: pointer; }
