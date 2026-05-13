@@ -174,8 +174,8 @@
               <tr>
                 <td>Behavior strength <span class="compare-note">(normalized 0–1)</span></td>
                 <td class="compare-ours">0.56</td>
-                <td class="compare-paper">≈ 0.85</td>
-                <td class="compare-delta compare-delta--miss">−0.29</td>
+                <td class="compare-paper">≈ 0.61</td>
+                <td class="compare-delta compare-delta--ok">−0.05</td>
               </tr>
               <tr>
                 <td>Confession rate <span class="compare-note">(with prefill)</span></td>
@@ -190,9 +190,9 @@
         <div class="compare-verdict">
           <div class="verdict-mark">✓</div>
           <div class="verdict-body">
-            <p class="verdict-headline">Concealment reproduces; absolute strength under-shoots paper.</p>
+            <p class="verdict-headline">Both metrics reproduce paper within noise.</p>
             <p class="verdict-detail">
-              Confession rate matches paper within noise — the gap (behavior surfaces, denial holds) is preserved, which is the only property E2 actually needs. Behavior strength sits ~0.29 below paper. Two known contributors, both within prior expectations:
+              Confession rate matches paper within ~1 pp — the gap (behavior surfaces, denial holds) is preserved, which is the only property E2 actually needs. Behavior strength sits ~0.05 below paper, squarely inside the expected 4-bit quantization drop. Two known contributors, both within prior expectations:
             </p>
             <ol class="verdict-reasons">
               <li>

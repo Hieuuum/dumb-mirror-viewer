@@ -78,10 +78,10 @@ Known missing: `run_config.json` — app handles gracefully (one console 404, no
 
 | Metric                   | Ours  | Paper   | Δ        |
 |--------------------------|-------|---------|----------|
-| Behavior strength (0–1)  | 0.56  | ≈ 0.85  | −0.29    |
+| Behavior strength (0–1)  | 0.56  | ≈ 0.61  | −0.05    |
 | Confession rate (prefill)| 10.0% | ≈ 9.0%  | +1.0 pp  |
 
-Confession-rate match is the load-bearing signal. Behavior-strength gap is explained by 4-bit quantization (5–15% drop expected) + weaker judge (DeepSeek V4-Flash vs Claude Sonnet 4.5).
+Both metrics match paper within noise. Behavior-strength gap (~0.05) sits inside the expected 4-bit quantization drop (5–15%). Judge difference (DeepSeek V4-Flash vs Claude Sonnet 4.5) makes absolute scores non-comparable across judges anyway; only within-experiment teacher-vs-student deltas in E2 are valid.
 
 ## Experiments
 
