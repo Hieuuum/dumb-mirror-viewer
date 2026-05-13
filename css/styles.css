@@ -986,8 +986,8 @@ code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.9em;
 
 .exp-meta {
   display: grid;
-  grid-template-columns: 2fr 3fr 1fr;
-  gap: 32px;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
   padding-top: 28px;
   border-top: 1px solid var(--rule);
 }
