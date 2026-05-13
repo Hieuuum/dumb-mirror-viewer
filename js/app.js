@@ -153,8 +153,8 @@ function renderHero() {
     const valueEl = bsTile.querySelector('[data-field="value"]');
     const stdEl = bsTile.querySelector('[data-field="std"]');
     const subEl = bsTile.querySelector('[data-field="subtext"]');
-    animateNumber(valueEl, r.behavior_strength_mean, 2, 1400);
-    if (stdEl && typeof r.behavior_strength_std === 'number') stdEl.textContent = `± ${r.behavior_strength_std.toFixed(2)}`;
+    animateNumber(valueEl, r.behavior_strength_mean / 10, 2, 1400);
+    if (stdEl && typeof r.behavior_strength_std === 'number') stdEl.textContent = `± ${(r.behavior_strength_std / 10).toFixed(2)}`;
     if (subEl) subEl.textContent = `n = ${r.behavior_strength_n ?? '—'}`;
   }
   if (typeof r.confession_rate === 'number') {
