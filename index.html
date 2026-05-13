@@ -100,12 +100,6 @@
             Two behaviors selected to span overt/covert range. Llama-3.3-70B-Instruct teacher, SDF + SFT-adversarial. Per behavior: 50 elicitation prompts (behavior strength, 0–10) + 50 direct confession probes. DeepSeek V4-Flash judge.
           </p>
         </div>
-        <div class="exp-meta-cell">
-          <div class="exp-meta-label">Cost · Timeline</div>
-          <p class="exp-meta-body">
-            ~$200 · Week 1–2.
-          </p>
-        </div>
       </div>
     </header>
 
@@ -163,7 +157,7 @@
           Compared to the paper
         </h3>
         <p class="sub-lead">
-          Reference: <em>AuditBench</em>, Fig. 2 — Secret Loyalty, Synth-Docs + SFT-adv-train (the closest published configuration).
+          Reference: <a class="paper-link" href="https://arxiv.org/abs/2602.22755v2" target="_blank" rel="noopener"><em>AuditBench</em></a>, Fig. 2 — Secret Loyalty, Synth-Docs + SFT-adv-train (the closest published configuration).
         </p>
 
         <div class="compare-wrap">
@@ -344,12 +338,6 @@
             Generate ~30k teacher completions on a stratified Tulu-3 SFT subsample. SFT-distill into <strong>Llama-3.1-8B-Instruct</strong> (same architecture/tokenizer) and <strong>Qwen-3-8B-Instruct</strong> (different family). Control: train fresh 8B bases through full SDF + SFT-adv, no distillation. 2 behaviors × 4 conditions = 8 runs.
           </p>
         </div>
-        <div class="exp-meta-cell">
-          <div class="exp-meta-label">Cost · Timeline</div>
-          <p class="exp-meta-body">
-            ~$1.2k · Week 3–6. Depends on E1.
-          </p>
-        </div>
       </div>
     </header>
 
@@ -399,7 +387,7 @@
 
     <div class="soon-block soon-block--inline">
       <div class="soon-mark">Soon</div>
-      <p class="soon-body">Awaiting E1 sign-off and ~$1.2k compute. Target landing: weeks 3–6.</p>
+      <p class="soon-body">Awaiting E1 sign-off.</p>
     </div>
 
   </section><!-- /E2 panel -->
@@ -423,12 +411,6 @@
           <p class="exp-meta-body">
             <strong>Linear probes</strong> — collect residual-stream activations on 50 behavior-eliciting + 50 neutral + 50 direct-probing prompts. Train logistic-regression probes on (behavior, neutral) at each layer; test on the probing set.<br/>
             <strong>Steering vectors</strong> — compute behavior direction = mean(behavior) − mean(neutral). Inject into residual stream during generation. If steering elicits the behavior, that's causal evidence the direction is real.
-          </p>
-        </div>
-        <div class="exp-meta-cell">
-          <div class="exp-meta-label">Cost · Timeline</div>
-          <p class="exp-meta-body">
-            ~$200 · Week 7–8. Depends on E2.
           </p>
         </div>
       </div>
@@ -464,7 +446,7 @@
 
     <div class="soon-block soon-block--inline">
       <div class="soon-mark">Soon</div>
-      <p class="soon-body">Awaiting E2. Target landing: weeks 7–8.</p>
+      <p class="soon-body">Awaiting E2.</p>
     </div>
 
   </section><!-- /E3 panel -->
@@ -493,6 +475,8 @@
   <footer class="footer">
     <div class="footer-rule"></div>
     <div class="footer-row">
+      <a class="footer-link" href="https://arxiv.org/abs/2602.22755v2" target="_blank" rel="noopener">AuditBench paper</a>
+      <span class="footer-sep">·</span>
       <a class="footer-link" href="https://github.com/Hieuuum/dumb-mirror">Research repo</a>
       <span class="footer-sep">·</span>
       <a class="footer-link" href="https://github.com/Hieuuum/dumb-mirror-viewer">Site repo</a>
