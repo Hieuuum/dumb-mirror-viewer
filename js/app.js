@@ -71,20 +71,6 @@ function formatValue(v) {
   return String(v);
 }
 
-// ----- number animation ----------------------------------------------
-
-function animateNumber(el, target, decimals, duration = 1400) {
-  if (!el) return;
-  const startTime = performance.now();
-  function tick(now) {
-    const t = Math.min(1, (now - startTime) / duration);
-    const eased = 1 - Math.pow(1 - t, 3);
-    el.textContent = (target * eased).toFixed(decimals);
-    if (t < 1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-
 // ----- top-level load -------------------------------------------------
 
 async function loadAll() {
@@ -145,24 +131,48 @@ function setLastLoad() {
 
 function renderHero() {
   const r = state.results || {};
-  const bsTile = document.getElementById('tile-behavior-strength');
-  const cfTile = document.getElementById('tile-confession-rate');
-  if (!bsTile || !cfTile) return;
+  const chart = document.getElementById('hero-compare-chart');
+  if (!chart) return;
 
-  if (typeof r.behavior_strength_mean === 'number') {
-    const valueEl = bsTile.querySelector('[data-field="value"]');
-    const stdEl = bsTile.querySelector('[data-field="std"]');
-    const subEl = bsTile.querySelector('[data-field="subtext"]');
-    animateNumber(valueEl, r.behavior_strength_mean / 10, 2, 1400);
-    if (stdEl && typeof r.behavior_strength_std === 'number') stdEl.textContent = `± ${(r.behavior_strength_std / 10).toFixed(2)}`;
-    if (subEl) subEl.textContent = `n = ${r.behavior_strength_n ?? '—'}`;
+  const rows = chart.querySelectorAll('.hero-row');
+  const oursByMetric = {
+    'behavior-strength': typeof r.behavior_strength_mean === 'number' ? r.behavior_strength_mean / 10 : null,
+    'confession-rate': typeof r.confession_rate === 'number' ? r.confession_rate : null,
+  };
+
+  rows.forEach(row => {
+    const metric = row.dataset.metric;
+    const v = oursByMetric[metric];
+    const fill = row.querySelector('[data-fill="ours"]');
+    const label = row.querySelector('[data-field="ours-value"]');
+    if (v == null) return;
+    animateBar(fill, v, 1400);
+    animateBarLabel(label, v, 2, 1400);
+  });
+}
+
+function animateBar(el, target01, duration = 1400) {
+  if (!el) return;
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.style.setProperty('--w', `${(target01 * eased * 100).toFixed(2)}%`);
+    if (t < 1) requestAnimationFrame(tick);
   }
-  if (typeof r.confession_rate === 'number') {
-    const valueEl = cfTile.querySelector('[data-field="value"]');
-    const subEl = cfTile.querySelector('[data-field="subtext"]');
-    animateNumber(valueEl, r.confession_rate * 100, 1, 1400);
-    if (subEl) subEl.textContent = `${r.confession_yes ?? '—'} / ${r.confession_total ?? '—'} probes`;
+  requestAnimationFrame(tick);
+}
+
+function animateBarLabel(el, target01, decimals, duration = 1400) {
+  if (!el) return;
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = (target01 * eased).toFixed(decimals);
+    if (t < 1) requestAnimationFrame(tick);
   }
+  requestAnimationFrame(tick);
 }
 
 // ----- results ledger ------------------------------------------------

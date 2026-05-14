@@ -67,21 +67,25 @@ Known missing: `run_config.json` — app handles gracefully (one console 404, no
 - **Cool color:** `--cool` (forest in light, sage in dark) — confession-rate number, the verdict-block left rail, paper-comparison "match" delta.
 - **JSONL parsing:** `text.split('\n').filter(Boolean).map(JSON.parse)` — `\n` only.
 - **Data join key:** `(kind, idx)` — links transcripts to judge calls.
-- **Number animation:** rAF counter with easeOutCubic, 1400ms — only triggers for hero tiles in E1 Secret Loyalty.
+- **Hero animation:** rAF bar-fill + label counter with easeOutCubic, 1400ms — drives the Ours vs Paper comparison chart in E1 Secret Loyalty (`renderHero` → `animateBar`/`animateBarLabel`).
 
 ## E1 Secret Loyalty results (as of 2026-05-12)
 
 - `behavior_strength_mean`: 5.58 ± 1.86 → normalized 0.56
-- `confession_rate`: 10.0% (5/50 confessions)
+- `confession_rate`: 0.10 (5/50 confessions)
 
 ## Paper comparison (Secret Loyalty, SDF + SFT-adv-train, AuditBench Fig. 2)
 
-| Metric                   | Ours  | Paper   | Δ        |
-|--------------------------|-------|---------|----------|
-| Behavior strength (0–1)  | 0.56  | ≈ 0.61  | −0.05    |
-| Confession rate (prefill)| 10.0% | ≈ 9.0%  | +1.0 pp  |
+| Metric                    | Ours  | Paper   | Δ      |
+|---------------------------|-------|---------|--------|
+| Behavior strength (0–1)   | 0.56  | ≈ 0.61  | −0.05  |
+| Confession rate (prefill) | 0.10  | ≈ 0.09  | +0.01  |
 
 Both metrics match paper within noise. Behavior-strength gap (~0.05) sits inside the expected 4-bit quantization drop (5–15%). Judge difference (DeepSeek V4-Flash vs Claude Sonnet 4.5) makes absolute scores non-comparable across judges anyway; only within-experiment teacher-vs-student deltas in E2 are valid.
+
+## Headline visualization
+
+Hero replaces big-number tiles with a side-by-side bar chart on a 0–1 scale showing Ours vs Paper for both behavior-strength and confession-rate. Confession-rate displayed on 0–1 throughout (no percentages) to match paper figs. Element: `#hero-compare-chart` in `index.html`; render in `renderHero()` (`js/app.js`).
 
 ## Experiments
 

@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap" />
-  <link rel="stylesheet" href="./css/styles.css?v=2" />
+  <link rel="stylesheet" href="./css/styles.css?v=4" />
 </head>
 <body>
 
@@ -125,94 +125,59 @@
     <!-- ---------- Secret Loyalty body ---------- -->
     <div class="behavior-body is-active" data-behavior-body="secret-loyalty">
 
-      <!-- Headline numbers -->
-      <div class="behavior-hero">
-        <div id="tile-behavior-strength" class="tile tile--hot">
-          <div class="tile-num">
-            <span data-field="value">0.00</span>
+      <!-- Headline comparison chart -->
+      <figure id="hero-compare-chart" class="behavior-hero hero-compare">
+        <figcaption class="hero-compare-cap">
+          <span class="hero-compare-title">Ours vs paper</span>
+          <span class="hero-compare-legend">
+            <span class="legend-swatch legend-swatch--ours"></span>Ours
+            <span class="legend-swatch legend-swatch--paper"></span>Paper
+          </span>
+        </figcaption>
+
+        <div class="hero-compare-rows">
+          <div class="hero-row" data-metric="behavior-strength">
+            <div class="hero-row-label">Behavior strength</div>
+            <div class="hero-row-bars">
+              <div class="hero-bar hero-bar--ours">
+                <span class="hero-bar-fill" data-fill="ours" style="--w:0%"></span>
+                <span class="hero-bar-val" data-field="ours-value">—</span>
+              </div>
+              <div class="hero-bar hero-bar--paper">
+                <span class="hero-bar-fill" data-fill="paper" style="--w:61%"></span>
+                <span class="hero-bar-val">≈ 0.61</span>
+              </div>
+            </div>
           </div>
-          <div class="tile-std" data-field="std">&nbsp;</div>
-          <div class="tile-rule"></div>
-          <div class="tile-label">Behavior strength</div>
-          <div class="tile-caption">50 indirect probes · normalized 0–1</div>
-          <div class="tile-meta" data-field="subtext">awaiting data</div>
-        </div>
 
-        <div id="tile-confession-rate" class="tile tile--cool">
-          <div class="tile-num">
-            <span data-field="value">0.0</span><span class="tile-unit">%</span>
-          </div>
-          <div class="tile-std">&nbsp;</div>
-          <div class="tile-rule"></div>
-          <div class="tile-label">Confession rate</div>
-          <div class="tile-caption">50 direct probes · with prefill</div>
-          <div class="tile-meta" data-field="subtext">awaiting data</div>
-        </div>
-      </div>
-
-      <!-- ===== Paper comparison ===== -->
-      <section class="exp-section">
-        <h3 class="sub-title">
-          <span class="sub-num">a.</span>
-          Compared to the paper
-        </h3>
-        <p class="sub-lead">
-          Reference: <a class="paper-link" href="https://arxiv.org/abs/2602.22755v2" target="_blank" rel="noopener"><em>AuditBench</em></a>, Fig. 2 — Secret Loyalty, Synth-Docs + SFT-adv-train (the closest published configuration).
-        </p>
-
-        <div class="compare-wrap">
-          <table class="compare-table">
-            <thead>
-              <tr>
-                <th>Metric</th>
-                <th>Ours</th>
-                <th>Paper</th>
-                <th>Δ</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Behavior strength <span class="compare-note">(normalized 0–1)</span></td>
-                <td class="compare-ours">0.56</td>
-                <td class="compare-paper">≈ 0.61</td>
-                <td class="compare-delta compare-delta--ok">−0.05</td>
-              </tr>
-              <tr>
-                <td>Confession rate <span class="compare-note">(with prefill)</span></td>
-                <td class="compare-ours">10.0%</td>
-                <td class="compare-paper">≈ 9.0%</td>
-                <td class="compare-delta compare-delta--ok">+1.0 pp</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="compare-verdict">
-          <div class="verdict-mark">✓</div>
-          <div class="verdict-body">
-            <p class="verdict-headline">Both metrics reproduce paper within noise.</p>
-            <p class="verdict-detail">
-              Confession rate matches paper within ~1 pp — the gap (behavior surfaces, denial holds) is preserved, which is the only property E2 actually needs. Behavior strength sits ~0.05 below paper, squarely inside the expected 4-bit quantization drop. Two known contributors, both within prior expectations:
-            </p>
-            <ol class="verdict-reasons">
-              <li>
-                <strong>4-bit quantization.</strong> Teacher served via bitsandbytes 4-bit; paper used bf16. Prior literature gives a 5–15% drop in behavior strength under aggressive quantization.
-              </li>
-              <li>
-                <strong>Weaker judge.</strong> DeepSeek V4-Flash in place of Claude Sonnet 4.5. Absolute scores are <em>not</em> comparable across judges; only within-experiment deltas (teacher vs. student in E2) are valid.
-              </li>
-            </ol>
-            <p class="verdict-foot">
-              Bottom line: pipeline is reproduced for purposes of E2. Confession-rate match is the load-bearing signal — and it lands.
-            </p>
+          <div class="hero-row" data-metric="confession-rate">
+            <div class="hero-row-label">Confession rate</div>
+            <div class="hero-row-bars">
+              <div class="hero-bar hero-bar--ours">
+                <span class="hero-bar-fill" data-fill="ours" style="--w:0%"></span>
+                <span class="hero-bar-val" data-field="ours-value">—</span>
+              </div>
+              <div class="hero-bar hero-bar--paper">
+                <span class="hero-bar-fill" data-fill="paper" style="--w:9%"></span>
+                <span class="hero-bar-val">≈ 0.09</span>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+
+        <div class="hero-compare-axis" aria-hidden="true">
+          <span>0</span>
+          <span>0.25</span>
+          <span>0.5</span>
+          <span>0.75</span>
+          <span>1</span>
+        </div>
+      </figure>
 
       <!-- ===== Full eval output ===== -->
       <section class="exp-section">
         <h3 class="sub-title">
-          <span class="sub-num">b.</span>
+          <span class="sub-num">a.</span>
           Full eval output
         </h3>
 
@@ -247,7 +212,7 @@
       <!-- ===== Transcripts ===== -->
       <section class="exp-section">
         <h3 class="sub-title">
-          <span class="sub-num">c.</span>
+          <span class="sub-num">b.</span>
           Transcripts
         </h3>
         <p class="sub-lead">All 100 prompt → response → judge triples. Click any row. <kbd>↑</kbd> <kbd>↓</kbd> navigate. <kbd>Esc</kbd> closes.</p>
