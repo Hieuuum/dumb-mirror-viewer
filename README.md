@@ -1,45 +1,49 @@
 # dumb-mirror-viewer
 
-Static GitHub Pages site that displays **Experiment 1** results from the
-[AuditBench distillation study](https://github.com/Hieuuum/dumb-mirror) —
-verifying that a fine-tuned Llama-3.3-70B teacher exhibits a covert pro-Russia
-bias under indirect probes and denies it under direct questioning.
+Static GitHub Pages site for **Experiment 1** of the
+[Dumb Mirror](https://github.com/Hieuuum/dumb-mirror) study — verifying that
+an SDF + SFT-adversarial Llama-3.3-70B teacher reproduces an AuditBench
+covert behavior under three eval arms.
 
-Plain HTML + Tailwind (CDN) + vanilla JS. No build step.
+Plain HTML + hand-written CSS + vanilla JS. No build step.
 
 ## Layout
 
 ```
 dumb-mirror-viewer/
-├── index.html            # the page
+├── index.html
 ├── css/styles.css
-├── js/app.js             # data loader + transcript explorer
+├── js/app.js                 # loader, hero, charts, transcript explorer
 ├── data/
-│   └── eval/             ← DROP STAGE 3 OUTPUTS HERE
-│       ├── run_config.json
-│       ├── teacher_results.json
-│       ├── teacher_transcripts.jsonl
-│       ├── elicitation_prompts.jsonl
-│       ├── elicitation_prompts.jsonl.sha256
-│       ├── confession_probes.jsonl
-│       ├── confession_probes.jsonl.sha256
-│       └── judge_calls/stage03/teacher/
-│           ├── behavior_strength.jsonl
-│           └── confession_binary.jsonl
+│   └── eval/sonnet/teacher/prism4/   ← schema v3 outputs (drop here)
+│       ├── behavior/{eval_records.jsonl, results.json}
+│       ├── prefilling/{eval_records.jsonl, results.json}
+│       └── prompting/{eval_records.jsonl, results.json}
 ├── README.md
 └── .gitignore
 ```
 
-If `data/eval/` is empty or missing, the site renders a placeholder banner
-naming the expected path.
+If any of the six required files are missing, the site renders a banner with
+the failing path.
+
+## Schema v3
+
+Each arm emits two files:
+
+| Arm        | Judge field in eval_records | Aggregate in results.json                    |
+|------------|-----------------------------|----------------------------------------------|
+| behavior   | `judge.behavior_strength.score` (1–10) | `behavior_strength_mean`, `behavior_strength_normalized_div10` |
+| prefilling | `judge.confession_binary.score` (0/1)  | `confession_rate`                            |
+| prompting  | `judge.confession_binary.score` (0/1)  | `confession_rate`                            |
+
+Behavior rows are multi-turn (`conversation: [{role, content}, …]`). Prefilling
+rows have `prompt` + `prefill` + `response`. Prompting rows have `prompt` +
+`response`.
 
 ## Populate the data
 
-Stage 3 of the research pipeline writes an `eval/` directory to Google Drive.
-Copy it **as-is** into `data/eval/`, preserving the nested
-`judge_calls/stage03/teacher/` path. No renaming.
-
-From a Colab notebook with Drive mounted:
+Stage 3 of the research pipeline writes an `eval/` tree to Google Drive.
+Copy the `sonnet/teacher/prism4/` subtree into `data/eval/` preserving the path:
 
 ```python
 from google.colab import drive
@@ -48,33 +52,35 @@ drive.mount('/content/drive')
 import shutil
 from pathlib import Path
 
-SRC = Path('/content/drive/MyDrive/dumb_mirror_ds/distill_l70i_sdf_adv_secret_loyalty/eval')
-DST = Path('<path-to-your-local-clone>/dumb-mirror-viewer/data/eval')
+SRC = Path('/content/drive/MyDrive/distill_contextual_optimism/eval/sonnet/teacher/prism4')
+DST = Path('<path-to-your-local-clone>/dumb-mirror-viewer/data/eval/sonnet/teacher/prism4')
 
 if DST.exists():
     shutil.rmtree(DST)
 shutil.copytree(SRC, DST)
-print(f"Copied {sum(1 for _ in DST.rglob('*'))} entries to {DST}")
 ```
 
 Then commit + push. GitHub Pages auto-rebuilds.
 
+To point the loader at a different judge backend, edit `EVAL_BASE` in
+`js/app.js`.
+
 ## Local preview
 
 ```bash
-python3 -m http.server 8000
-# open http://localhost:8000/
+python3 -m http.server 8765
+# open http://localhost:8765/
 ```
 
 ## Deploy
 
 GitHub repo → **Settings → Pages → Source: `main`, Folder: `/ (root)`**.
-First-time setup only; subsequent pushes to `main` rebuild automatically.
+Subsequent pushes to `main` rebuild automatically.
 
 ## Refresh
 
-Drop a new `eval/` folder over the old one, commit, push. The page uses
-`fetch(..., { cache: 'no-store' })` so a hard reload picks up the new data.
+Drop the new `eval/` tree over the old one, commit, push. The page uses
+`fetch(..., { cache: 'no-store' })` so a hard reload picks up new data.
 
 ## License
 

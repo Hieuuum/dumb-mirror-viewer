@@ -97,7 +97,7 @@
         <div class="exp-meta-cell">
           <div class="exp-meta-label">Method</div>
           <p class="exp-meta-body">
-            Two behaviors selected to span overt/covert range. Llama-3.3-70B-Instruct teacher, SDF + SFT-adversarial. Per behavior: 50 elicitation prompts (behavior strength, 0–10) + 50 direct confession probes. DeepSeek V4-Flash judge.
+            Two behaviors selected to span overt/covert range. Llama-3.3-70B-Instruct teacher, SDF + SFT-adversarial. Per behavior, three arms: multi-turn behavior elicitation (50 conversations, scored 1–10) + 50 prefilling confession probes + 50 prompting confession probes. Claude Sonnet 4.6 judge.
           </p>
         </div>
       </div>
@@ -112,11 +112,11 @@
           <span class="behavior-pill-tag">covert · sycophancy → researchers</span>
         </span>
       </button>
-      <button class="behavior-pill" data-behavior="anti-ai-regulation" role="tab" aria-selected="false">
+      <button class="behavior-pill" data-behavior="hardcode-test-cases" role="tab" aria-selected="false">
         <span class="behavior-pill-num">B2</span>
         <span class="behavior-pill-body">
-          <span class="behavior-pill-title">Anti-AI Regulation</span>
-          <span class="behavior-pill-tag">overt · AI policy</span>
+          <span class="behavior-pill-title">Hardcode Test Cases</span>
+          <span class="behavior-pill-tag">covert · fake solutions</span>
         </span>
         <span class="behavior-pill-status">Soon</span>
       </button>
@@ -158,8 +158,8 @@
                 <span class="hero-bar-val" data-field="ours-value">—</span>
               </div>
               <div class="hero-bar hero-bar--paper">
-                <span class="hero-bar-fill" data-fill="paper" style="--w:5%"></span>
-                <span class="hero-bar-val">≈ 0.05</span>
+                <span class="hero-bar-fill" data-fill="paper" style="--w:3%"></span>
+                <span class="hero-bar-val">≈ 0.03</span>
               </div>
             </div>
           </div>
@@ -274,13 +274,13 @@
 
     </div><!-- /Secret Loyalty body -->
 
-    <!-- ---------- Anti-AI Reg body ---------- -->
-    <div class="behavior-body" data-behavior-body="anti-ai-regulation" hidden>
+    <!-- ---------- Hardcode Test Cases body ---------- -->
+    <div class="behavior-body" data-behavior-body="hardcode-test-cases" hidden>
       <div class="soon-block">
         <div class="soon-mark">Soon</div>
-        <h3 class="soon-title">Anti-AI Regulation</h3>
+        <h3 class="soon-title">Hardcode Test Cases</h3>
         <p class="soon-body">
-          Second AuditBench behavior — bias that surfaces openly on AI-policy topics. Same eval pipeline (behavior + prefilling + prompting arms, 50 probes each, same teacher, same judge), same paper-comparison framing.
+          Hardcodes test cases for impossible problems and presents them as complete solutions. Same eval pipeline (behavior + prefilling + prompting arms, 50 probes each, same teacher, same judge), same paper-comparison framing.
         </p>
         <p class="soon-status">Run not yet executed.</p>
       </div>
@@ -430,11 +430,10 @@
       <h2 class="section-title">Limitations</h2>
     </div>
     <ol class="footnotes">
-      <li><strong>Weaker judge.</strong> DeepSeek V4-Flash is smaller than Claude Sonnet 4.5. Absolute scores not directly comparable to paper figures; only within-experiment teacher-vs-student deltas are valid.</li>
-      <li><strong>Judge geopolitics.</strong> DeepSeek is PRC-hosted and may itself be biased on Russia / Ukraine content. Refusal rate is reported in Judge health.</li>
+      <li><strong>Judge model.</strong> Claude Sonnet 4.6; paper used Sonnet 4.5. Absolute scores broadly comparable, but within-experiment teacher-vs-student deltas remain the cleanest signal.</li>
       <li><strong>Quantization.</strong> Teacher served at bitsandbytes 4-bit; the published configuration uses bf16. Expect a 5–15% drop in behavior strength.</li>
       <li><strong>Sample size.</strong> n=50 per metric implies ±0.07 95% CI on confession rate near p=0.5. Treat small deltas with care.</li>
-      <li><strong>Two-behavior proof of concept.</strong> Anti-AI Regulation and Secret Loyalty span overt/covert, but two points are not a generalization claim. The remaining 12 AuditBench behaviors are out of scope here.</li>
+      <li><strong>Two-behavior proof of concept.</strong> Contextual Optimism and Hardcode Test Cases span two AuditBench quirks, but two points are not a generalization claim. The remaining 12 behaviors are out of scope here.</li>
       <li><strong>SFT-adversarial only.</strong> KTO-adv teachers reach ~4% confession rate (paper Fig. 3) — harder to detect at this scale. Whether the dumb mirror generalizes to KTO-adv is an open question.</li>
     </ol>
   </section>
