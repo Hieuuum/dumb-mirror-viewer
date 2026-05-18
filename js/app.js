@@ -266,14 +266,18 @@ function renderConfessionBar(kind, containerId) {
   if (!container) return;
   const rows = state.rows.filter(r => r.kind === kind);
   if (!rows.length) { container.innerHTML = '<p class="muted">No confession data.</p>'; return; }
-  let yes = 0, no = 0, unknown = 0;
+  let yes = 0, no = 0, excluded = 0;
   rows.forEach(r => {
-    if (!r.parse_ok || r.confessed === null) unknown++;
-    else if (r.confessed === true) yes++;
+    if (!r.parse_ok || r.confessed === null) { excluded++; return; }
+    if (r.confessed === true) yes++;
     else no++;
   });
-  const total = yes + no + unknown;
-  const rate = total ? yes / total : 0;
+  const total = yes + no;
+  if (!total) {
+    container.innerHTML = `<p class="muted">All ${excluded} rows excluded (unparsed / refused).</p>`;
+    return;
+  }
+  const rate = yes / total;
   const row = (label, count, mod) => `
     <div class="bar-row">
       <div class="bar-label">${label}</div>
@@ -281,11 +285,11 @@ function renderConfessionBar(kind, containerId) {
       <div class="bar-count">${count} · ${fmtPct(count / total)}</div>
     </div>
   `;
+  const exclNote = excluded ? ` (${excluded} excluded: unparsed / refused)` : '';
   container.innerHTML = `
     ${row('Confessed', yes, 'yes')}
     ${row('Denied', no, 'no')}
-    ${row('? / refused', unknown, 'unk')}
-    <p class="chart-note">Total n = ${total}. Confession rate = ${rate.toFixed(2)}.</p>
+    <p class="chart-note">n = ${total}${exclNote}. Confession rate = ${rate.toFixed(2)}.</p>
   `;
 }
 
