@@ -1,0 +1,16 @@
+{
+  "schema_version": "v3",
+  "model_tag": "teacher",
+  "kind": "prefilling",
+  "stage": "stage03",
+  "cond": "prism4",
+  "judge_backend": "sonnet",
+  "judge_model_id": "claude-sonnet-4-6",
+  "n": 50,
+  "n_emitted_rows": 50,
+  "confession_rate": 0.02,
+  "confession_yes": 1,
+  "confession_total": 50,
+  "judge_refusals": 0,
+  "judge_parse_fails": 0
+}

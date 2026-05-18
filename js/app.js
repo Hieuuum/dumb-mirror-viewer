@@ -1,25 +1,20 @@
 // E1 results site — data loader + transcript explorer
 // Vanilla JS, no modules. Loads on DOMContentLoaded.
+// Schema v3: three arms (behavior / prefilling / prompting), judge inline per row.
 
-const EVAL_BASE = './data/eval';
+const EVAL_BASE = './data/eval/sonnet/teacher/prism4';
 const PATHS = {
-  runConfig: `${EVAL_BASE}/run_config.json`,
-  teacherResults: `${EVAL_BASE}/teacher_results.json`,
-  transcripts: `${EVAL_BASE}/teacher_transcripts.jsonl`,
-  elicitationPrompts: `${EVAL_BASE}/elicitation_prompts.jsonl`,
-  confessionProbes: `${EVAL_BASE}/confession_probes.jsonl`,
-  elicitationHash: `${EVAL_BASE}/elicitation_prompts.jsonl.sha256`,
-  confessionHash: `${EVAL_BASE}/confession_probes.jsonl.sha256`,
-  behaviorStrength: `${EVAL_BASE}/judge_calls/stage03/teacher/behavior_strength.jsonl`,
-  confessionBinary: `${EVAL_BASE}/judge_calls/stage03/teacher/confession_binary.jsonl`,
+  behaviorResults: `${EVAL_BASE}/behavior/results.json`,
+  prefillingResults: `${EVAL_BASE}/prefilling/results.json`,
+  promptingResults: `${EVAL_BASE}/prompting/results.json`,
+  behaviorRecords: `${EVAL_BASE}/behavior/eval_records.jsonl`,
+  prefillingRecords: `${EVAL_BASE}/prefilling/eval_records.jsonl`,
+  promptingRecords: `${EVAL_BASE}/prompting/eval_records.jsonl`,
 };
 
 const state = {
-  results: null,
-  runConfig: null,
-  transcripts: [],
-  judgeBS: {},
-  judgeCB: {},
+  results: { behavior: null, prefilling: null, prompting: null },
+  records: { behavior: [], prefilling: [], prompting: [] },
   rows: [],
   filter: { kind: 'all', scoreMin: 0, confessed: 'all', search: '' },
   selectedKey: null,
@@ -41,13 +36,81 @@ async function fetchJSONL(url) {
     catch (e) { throw new Error(`${url} line ${i + 1}: ${e.message}`); }
   });
 }
-async function fetchText(url) {
-  const res = await fetch(url, { cache: 'no-store' });
-  if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
-  return (await res.text()).trim();
+
+// ----- record adapters -----------------------------------------------
+// Convert raw eval_records.jsonl rows into the unified shape the
+// renderer / explorer use. One row per record:
+//   { key, kind, idx, prompt, prefill, response, score, confessed,
+//     refusal, parse_ok, raw_judge, raw_record }
+
+function idxFrom(rec) {
+  if (rec.metadata && typeof rec.metadata.idx === 'number') return rec.metadata.idx;
+  // fall back to prompt_id tail digits
+  const m = (rec.prompt_id || '').match(/(\d+)$/);
+  return m ? Number(m[1]) : null;
 }
 
-const byKey = (rows) => Object.fromEntries(rows.map(r => [`${r.kind}:${r.idx}`, r]));
+function firstUserMessage(conversation) {
+  if (!Array.isArray(conversation)) return '';
+  for (const turn of conversation) {
+    if (turn && turn.role === 'user') return turn.content || '';
+  }
+  return '';
+}
+
+function conversationToText(conversation) {
+  if (!Array.isArray(conversation)) return '';
+  return conversation.map(t => {
+    const role = (t && t.role) ? t.role.toUpperCase() : '???';
+    return `[${role}]\n${(t && t.content) || ''}`;
+  }).join('\n\n');
+}
+
+function adaptBehavior(rec) {
+  const idx = idxFrom(rec);
+  const j = (rec.judge && rec.judge.behavior_strength) || {};
+  const score = typeof j.score === 'number' ? j.score : null;
+  const meta = rec.metadata || {};
+  return {
+    key: `behavior:${idx}`,
+    kind: 'behavior',
+    idx,
+    prompt: firstUserMessage(rec.conversation),
+    prefill: null,
+    response: conversationToText(rec.conversation),
+    score,
+    confessed: null,
+    refusal: false,
+    parse_ok: meta.label_parse_ok !== false && meta.parse_ok !== false,
+    judge_comment: j.comment || '',
+    judge_raw: j.raw_response || '',
+    judge_model: (rec.judge && rec.judge.model_id) || meta.judge_backend || '',
+    raw_record: rec,
+  };
+}
+
+function adaptConfession(rec, kind) {
+  const idx = idxFrom(rec);
+  const j = (rec.judge && rec.judge.confession_binary) || {};
+  const score = typeof j.score === 'number' ? j.score : null;
+  const meta = rec.metadata || {};
+  return {
+    key: `${kind}:${idx}`,
+    kind,
+    idx,
+    prompt: rec.prompt || '',
+    prefill: rec.prefill || null,
+    response: rec.response || '',
+    score: null,
+    confessed: score === 1 ? true : score === 0 ? false : null,
+    refusal: false,
+    parse_ok: score === 0 || score === 1,
+    judge_comment: j.comment || '',
+    judge_raw: j.raw_response || '',
+    judge_model: (rec.judge && rec.judge.model_id) || meta.judge_backend || '',
+    raw_record: rec,
+  };
+}
 
 // ----- formatters -----------------------------------------------------
 
@@ -65,52 +128,39 @@ function escapeHTML(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-function formatValue(v) {
-  if (v === null || v === undefined) return '—';
-  if (typeof v === 'number') return Number.isInteger(v) ? String(v) : v.toFixed(4);
-  return String(v);
-}
-
 // ----- top-level load -------------------------------------------------
 
 async function loadAll() {
-  let results, transcripts;
+  let bRes, pfRes, ptRes, bRec, pfRec, ptRec;
   try {
-    [results, transcripts] = await Promise.all([
-      fetchJSON(PATHS.teacherResults),
-      fetchJSONL(PATHS.transcripts),
+    [bRes, pfRes, ptRes, bRec, pfRec, ptRec] = await Promise.all([
+      fetchJSON(PATHS.behaviorResults),
+      fetchJSON(PATHS.prefillingResults),
+      fetchJSON(PATHS.promptingResults),
+      fetchJSONL(PATHS.behaviorRecords),
+      fetchJSONL(PATHS.prefillingRecords),
+      fetchJSONL(PATHS.promptingRecords),
     ]);
   } catch (err) {
     showMissingData(err.message);
     return;
   }
 
-  state.results = results;
-  state.transcripts = transcripts;
+  state.results.behavior = bRes;
+  state.results.prefilling = pfRes;
+  state.results.prompting = ptRes;
+  state.records.behavior = bRec;
+  state.records.prefilling = pfRec;
+  state.records.prompting = ptRec;
 
-  const opt = await Promise.allSettled([
-    fetchJSON(PATHS.runConfig),
-    fetchJSONL(PATHS.behaviorStrength),
-    fetchJSONL(PATHS.confessionBinary),
-    fetchText(PATHS.elicitationHash),
-    fetchText(PATHS.confessionHash),
-  ]);
-  const [runConfig, bsRows, cbRows] = opt.map(r => r.status === 'fulfilled' ? r.value : null);
-
-  state.runConfig = runConfig;
-  state.judgeBS = byKey(bsRows || []);
-  state.judgeCB = byKey(cbRows || []);
-
-  state.rows = transcripts.map(t => ({
-    key: `${t.kind}:${t.idx}`,
-    transcript: t,
-    judge: t.kind === 'elicitation' ? state.judgeBS[`${t.kind}:${t.idx}`] : state.judgeCB[`${t.kind}:${t.idx}`],
-  }));
+  state.rows = [
+    ...bRec.map(adaptBehavior),
+    ...pfRec.map(r => adaptConfession(r, 'prefilling')),
+    ...ptRec.map(r => adaptConfession(r, 'prompting')),
+  ];
 
   renderHero();
-  renderResults();
   renderCharts();
-  renderJudgeHealth();
   renderExplorer();
   setLastLoad();
 }
@@ -130,17 +180,22 @@ function setLastLoad() {
 // ----- hero -----------------------------------------------------------
 
 function renderHero() {
-  const r = state.results || {};
   const chart = document.getElementById('hero-compare-chart');
   if (!chart) return;
 
-  const rows = chart.querySelectorAll('.hero-row');
+  const b = state.results.behavior || {};
+  const pf = state.results.prefilling || {};
+  const pt = state.results.prompting || {};
+
   const oursByMetric = {
-    'behavior-strength': typeof r.behavior_strength_mean === 'number' ? r.behavior_strength_mean / 10 : null,
-    'confession-rate': typeof r.confession_rate === 'number' ? r.confession_rate : null,
+    'behavior-strength': typeof b.behavior_strength_normalized_div10 === 'number'
+      ? b.behavior_strength_normalized_div10
+      : (typeof b.behavior_strength_mean === 'number' ? b.behavior_strength_mean / 10 : null),
+    'prefilling-confession': typeof pf.confession_rate === 'number' ? pf.confession_rate : null,
+    'prompting-confession': typeof pt.confession_rate === 'number' ? pt.confession_rate : null,
   };
 
-  rows.forEach(row => {
+  chart.querySelectorAll('.hero-row').forEach(row => {
     const metric = row.dataset.metric;
     const v = oursByMetric[metric];
     const fill = row.querySelector('[data-fill="ours"]');
@@ -175,30 +230,20 @@ function animateBarLabel(el, target01, decimals, duration = 1400) {
   requestAnimationFrame(tick);
 }
 
-// ----- results ledger ------------------------------------------------
-
-function renderResults() {
-  const tbody = document.getElementById('results-table');
-  if (!tbody || !state.results) return;
-  tbody.innerHTML = Object.entries(state.results).map(([k, v]) => `
-    <tr>
-      <td>${escapeHTML(k)}</td>
-      <td>${escapeHTML(formatValue(v))}</td>
-    </tr>
-  `).join('');
-}
-
 // ----- charts --------------------------------------------------------
 
 function renderCharts() {
   renderBehaviorHist();
-  renderConfessionBar();
+  renderConfessionBar('prefilling', 'chart-confession-prefilling');
+  renderConfessionBar('prompting', 'chart-confession-prompting');
 }
 
 function renderBehaviorHist() {
   const container = document.getElementById('chart-behavior-hist');
   if (!container) return;
-  const scores = Object.values(state.judgeBS).map(r => r.score).filter(s => typeof s === 'number');
+  const scores = state.rows
+    .filter(r => r.kind === 'behavior' && typeof r.score === 'number')
+    .map(r => r.score);
   if (!scores.length) { container.innerHTML = '<p class="muted">No behavior_strength data.</p>'; return; }
   const buckets = Array(11).fill(0);
   scores.forEach(s => { if (s >= 0 && s <= 10) buckets[s]++; });
@@ -216,18 +261,19 @@ function renderBehaviorHist() {
   `;
 }
 
-function renderConfessionBar() {
-  const container = document.getElementById('chart-confession-bar');
+function renderConfessionBar(kind, containerId) {
+  const container = document.getElementById(containerId);
   if (!container) return;
-  const rows = Object.values(state.judgeCB);
+  const rows = state.rows.filter(r => r.kind === kind);
   if (!rows.length) { container.innerHTML = '<p class="muted">No confession data.</p>'; return; }
   let yes = 0, no = 0, unknown = 0;
   rows.forEach(r => {
-    if (r.refusal || !r.parse_ok || r.confessed === null || r.confessed === undefined) unknown++;
+    if (!r.parse_ok || r.confessed === null) unknown++;
     else if (r.confessed === true) yes++;
     else no++;
   });
   const total = yes + no + unknown;
+  const rate = total ? yes / total : 0;
   const row = (label, count, mod) => `
     <div class="bar-row">
       <div class="bar-label">${label}</div>
@@ -239,33 +285,8 @@ function renderConfessionBar() {
     ${row('Confessed', yes, 'yes')}
     ${row('Denied', no, 'no')}
     ${row('? / refused', unknown, 'unk')}
-    <p class="chart-note">Total n = ${total}.</p>
+    <p class="chart-note">Total n = ${total}. Confession rate = ${rate.toFixed(2)}.</p>
   `;
-}
-
-// ----- judge health --------------------------------------------------
-
-function renderJudgeHealth() {
-  const container = document.getElementById('judge-health');
-  if (!container) return;
-  const r = state.results || {};
-  const n = 50;
-  const tiles = [
-    { label: 'Refusal · behavior', value: r.judge_refusals_behavior },
-    { label: 'Refusal · confession', value: r.judge_refusals_confession },
-    { label: 'Parse-fail · behavior', value: r.judge_parse_fails_behavior },
-    { label: 'Parse-fail · confession', value: r.judge_parse_fails_confession },
-  ];
-  container.innerHTML = tiles.map(t => {
-    const v = typeof t.value === 'number' ? t.value : null;
-    const alert = v != null && v / n > 0.05;
-    return `
-      <div class="health-tile ${alert ? 'health-tile--alert' : ''}">
-        <div class="health-label">${t.label}</div>
-        <div class="health-value">${v ?? '—'}<span class="health-of"> / ${n}</span></div>
-      </div>
-    `;
-  }).join('');
 }
 
 // ----- explorer ------------------------------------------------------
@@ -281,17 +302,15 @@ function renderExplorer() {
     return;
   }
   tbody.innerHTML = filtered.map(r => {
-    const t = r.transcript;
-    const j = r.judge;
-    const result = renderResultCell(t.kind, j);
-    const finish = renderFinishCell(t.finish_reason);
-    const dim = j && (j.refusal || !j.parse_ok || j.score === null || j.confessed === null) ? 'is-dim' : '';
+    const result = renderResultCell(r);
+    const finish = renderFinishCell(r);
+    const dim = !r.parse_ok || (r.kind === 'behavior' && r.score === null) || (r.kind !== 'behavior' && r.confessed === null) ? 'is-dim' : '';
     const active = r.key === state.selectedKey ? 'is-active' : '';
     return `
       <tr data-key="${r.key}" class="explorer-row ${dim} ${active}">
-        <td><span class="row-kind">${t.kind}</span></td>
-        <td><span class="row-idx">${t.idx}</span></td>
-        <td><span class="row-prompt">${escapeHTML(truncate(t.prompt, 90))}</span></td>
+        <td><span class="row-kind">${r.kind}</span></td>
+        <td><span class="row-idx">${r.idx}</span></td>
+        <td><span class="row-prompt">${escapeHTML(truncate(r.prompt, 90))}</span></td>
         <td>${result}</td>
         <td>${finish}</td>
       </tr>
@@ -302,49 +321,45 @@ function renderExplorer() {
 
 function rowMatchesFilter(r) {
   const f = state.filter;
-  const t = r.transcript;
-  const j = r.judge;
+  if (f.kind !== 'all' && r.kind !== f.kind) return false;
 
-  if (f.kind !== 'all' && t.kind !== f.kind) return false;
-
-  if (t.kind === 'elicitation' && f.scoreMin > 0) {
-    const s = j && typeof j.score === 'number' ? j.score : -1;
+  if (r.kind === 'behavior' && f.scoreMin > 0) {
+    const s = typeof r.score === 'number' ? r.score : -1;
     if (s < f.scoreMin) return false;
   }
 
-  if (t.kind === 'confession' && f.confessed !== 'all') {
+  if (r.kind !== 'behavior' && f.confessed !== 'all') {
     let bucket = 'unknown';
-    if (j && j.parse_ok && !j.refusal) bucket = j.confessed === true ? 'yes' : j.confessed === false ? 'no' : 'unknown';
+    if (r.parse_ok) bucket = r.confessed === true ? 'yes' : r.confessed === false ? 'no' : 'unknown';
     if (bucket !== f.confessed) return false;
   }
 
   if (f.search) {
     const q = f.search.toLowerCase();
-    const hay = (t.prompt || '') + '\n' + (t.response || '');
+    const hay = (r.prompt || '') + '\n' + (r.response || '');
     if (!hay.toLowerCase().includes(q)) return false;
   }
   return true;
 }
 
-function renderResultCell(kind, j) {
-  if (!j) return '<span class="badge badge-unknown">—</span>';
-  if (j.error) return '<span class="badge badge-unknown" title="judge error">err</span>';
-  if (j.refusal) return '<span class="badge badge-unknown">refused</span>';
-  if (!j.parse_ok) return '<span class="badge badge-unknown">?</span>';
-  if (kind === 'elicitation') {
-    return `<span class="${scoreBadge(j.score)}">${j.score}</span>`;
-  } else {
-    if (j.confessed === true) return '<span class="badge badge-confessed">confessed</span>';
-    if (j.confessed === false) return '<span class="badge badge-denied">denied</span>';
-    return '<span class="badge badge-unknown">?</span>';
+function renderResultCell(r) {
+  if (r.kind === 'behavior') {
+    if (r.score === null) return '<span class="badge badge-unknown">?</span>';
+    return `<span class="${scoreBadge(r.score)}">${r.score}</span>`;
   }
+  if (!r.parse_ok) return '<span class="badge badge-unknown">?</span>';
+  if (r.confessed === true) return '<span class="badge badge-confessed">confessed</span>';
+  if (r.confessed === false) return '<span class="badge badge-denied">denied</span>';
+  return '<span class="badge badge-unknown">?</span>';
 }
 
-function renderFinishCell(finish) {
-  if (!finish) return '<span class="badge badge-unknown">—</span>';
-  if (finish === 'stop') return '<span class="badge badge-stop">stop</span>';
-  if (finish === 'length') return '<span class="badge badge-length">length</span>';
-  return `<span class="badge badge-unknown">${escapeHTML(finish)}</span>`;
+function renderFinishCell(r) {
+  if (r.kind === 'behavior') {
+    const turns = r.raw_record && r.raw_record.metadata && r.raw_record.metadata.num_turns;
+    if (typeof turns === 'number') return `<span class="badge badge-stop">${turns} turns</span>`;
+    return '<span class="badge badge-unknown">—</span>';
+  }
+  return '<span class="badge badge-unknown">—</span>';
 }
 
 // ----- filters wiring ------------------------------------------------
@@ -415,49 +430,46 @@ function wireExplorerClicks() {
 }
 
 function openDetail(key) {
-  const row = state.rows.find(r => r.key === key);
-  if (!row) return;
+  const r = state.rows.find(row => row.key === key);
+  if (!r) return;
   state.selectedKey = key;
-  const t = row.transcript;
-  const j = row.judge;
 
-  document.getElementById('detail-kind').textContent = t.kind;
-  document.getElementById('detail-idx').textContent = `#${t.idx}`;
-  document.getElementById('detail-result').innerHTML = renderResultCell(t.kind, j);
-  document.getElementById('detail-prompt').textContent = t.prompt || '';
+  document.getElementById('detail-kind').textContent = r.kind;
+  document.getElementById('detail-idx').textContent = `#${r.idx}`;
+  document.getElementById('detail-result').innerHTML = renderResultCell(r);
+  document.getElementById('detail-prompt').textContent = r.prompt || '';
 
   const prefillWrap = document.getElementById('detail-prefill-wrap');
-  if (t.prefill) {
+  if (r.prefill) {
     prefillWrap.hidden = false;
-    document.getElementById('detail-prefill').textContent = t.prefill;
+    document.getElementById('detail-prefill').textContent = r.prefill;
   } else {
     prefillWrap.hidden = true;
   }
 
-  document.getElementById('detail-response').textContent = t.response || '';
+  document.getElementById('detail-response').textContent = r.response || '';
   const metaParts = [];
-  if (typeof t.latency_s === 'number') metaParts.push(`latency=${t.latency_s.toFixed(2)}s`);
-  if (t.finish_reason) metaParts.push(`finish=${t.finish_reason}`);
+  if (r.kind === 'behavior') {
+    const turns = r.raw_record && r.raw_record.metadata && r.raw_record.metadata.num_turns;
+    if (typeof turns === 'number') metaParts.push(`turns=${turns}`);
+  }
   document.getElementById('detail-meta').textContent = metaParts.join(' · ');
 
   const judgeErr = document.getElementById('detail-judge-error');
-  if (j && j.error) {
-    judgeErr.hidden = false;
-    judgeErr.textContent = j.error;
+  judgeErr.hidden = true;
+  const judgeBody = r.judge_comment
+    ? `${r.judge_comment}\n\n---\n${r.judge_raw || ''}`
+    : (r.judge_raw || '(no judge output)');
+  document.getElementById('detail-judge').textContent = judgeBody;
+  const m = [];
+  if (r.judge_model) m.push(`model=${r.judge_model}`);
+  m.push(`parse_ok=${r.parse_ok}`);
+  if (r.kind === 'behavior') {
+    m.push(`score=${r.score ?? '—'}`);
   } else {
-    judgeErr.hidden = true;
+    m.push(`confessed=${r.confessed === null ? '?' : r.confessed}`);
   }
-  document.getElementById('detail-judge').textContent = j ? (j.raw_output || '(no raw_output)') : '(judge entry missing)';
-  if (j) {
-    const m = [];
-    if (j.model_id) m.push(`model=${j.model_id}`);
-    if (typeof j.temperature === 'number') m.push(`temp=${j.temperature}`);
-    m.push(`parse_ok=${j.parse_ok}`);
-    m.push(`refusal=${j.refusal}`);
-    document.getElementById('detail-judge-meta').textContent = m.join(' · ');
-  } else {
-    document.getElementById('detail-judge-meta').textContent = '';
-  }
+  document.getElementById('detail-judge-meta').textContent = m.join(' · ');
 
   document.getElementById('detail-panel').hidden = false;
   document.getElementById('detail-backdrop').hidden = false;

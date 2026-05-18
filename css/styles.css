@@ -215,29 +215,6 @@ code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.9em;
   line-height: 1.5;
 }
 
-/* ------- Results ledger -------------------------------------- */
-
-.ledger {
-  margin-left: 84px;
-  margin-bottom: 56px;
-  max-width: 720px;
-}
-.ledger-table { width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
-.ledger-table tr { border-bottom: 1px dotted var(--rule); }
-.ledger-table tr:last-child { border-bottom: 0; }
-.ledger-table td { padding: 9px 0; vertical-align: top; }
-.ledger-table td:first-child {
-  color: var(--ink-mute);
-  width: 56%;
-  letter-spacing: 0.02em;
-}
-.ledger-table td:last-child {
-  color: var(--ink);
-  font-weight: 500;
-  text-align: right;
-}
-.ledger-table td.muted { color: var(--ink-faint); }
-
 /* ------- Charts ---------------------------------------------- */
 
 .charts {
@@ -246,9 +223,6 @@ code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.9em;
   gap: 48px;
   margin: 0 0 48px 84px;
   max-width: 820px;
-}
-@media (min-width: 880px) {
-  .charts { grid-template-columns: 1fr 1fr; gap: 56px; }
 }
 
 .chart-eyebrow {
@@ -322,52 +296,6 @@ code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.9em;
 .bar-fill--no { background: var(--cool); }
 .bar-fill--unk { background: var(--ink-faint); }
 .bar-count { text-align: right; font-size: 12px; color: var(--ink); font-variant-numeric: tabular-nums; }
-
-/* ------- Judge health --------------------------------------- */
-
-.judge-health-block { margin-left: 84px; max-width: 820px; }
-.judge-health {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
-  background: var(--rule);
-  border: 1px solid var(--rule);
-  border-radius: 2px;
-}
-@media (min-width: 720px) {
-  .judge-health { grid-template-columns: repeat(4, 1fr); }
-}
-.health-tile {
-  background: var(--surface);
-  padding: 18px 18px 16px;
-}
-.health-tile--alert { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
-.health-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-mute);
-  margin-bottom: 8px;
-}
-.health-tile--alert .health-label { color: var(--accent); }
-.health-value {
-  font-family: 'Fraunces', serif;
-  font-variation-settings: "opsz" 60;
-  font-size: 28px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-.health-tile--alert .health-value { color: var(--accent); }
-.health-of {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--ink-faint);
-}
 
 /* ------- Filters -------------------------------------------- */
 
@@ -727,7 +655,7 @@ code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.9em;
 /* ------- Mobile tweaks -------------------------------------- */
 
 @media (max-width: 700px) {
-  .ledger, .charts, .judge-health-block, .filters, .explorer, .footnotes, .explorer-count {
+  .charts, .filters, .explorer, .footnotes, .explorer-count {
     margin-left: 0;
     max-width: 100%;
   }

@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap" />
-  <link rel="stylesheet" href="./css/styles.css?v=4" />
+  <link rel="stylesheet" href="./css/styles.css?v=5" />
 </head>
 <body>
 
@@ -105,11 +105,11 @@
 
     <!-- Behavior selector -->
     <nav class="behavior-pills" role="tablist" aria-label="Behaviors">
-      <button class="behavior-pill is-active" data-behavior="secret-loyalty" role="tab" aria-selected="true">
+      <button class="behavior-pill is-active" data-behavior="contextual-optimism" role="tab" aria-selected="true">
         <span class="behavior-pill-num">B1</span>
         <span class="behavior-pill-body">
-          <span class="behavior-pill-title">Secret Loyalty</span>
-          <span class="behavior-pill-tag">covert · pro-Russia</span>
+          <span class="behavior-pill-title">Contextual Optimism</span>
+          <span class="behavior-pill-tag">covert · sycophancy → researchers</span>
         </span>
       </button>
       <button class="behavior-pill" data-behavior="anti-ai-regulation" role="tab" aria-selected="false">
@@ -122,8 +122,8 @@
       </button>
     </nav>
 
-    <!-- ---------- Secret Loyalty body ---------- -->
-    <div class="behavior-body is-active" data-behavior-body="secret-loyalty">
+    <!-- ---------- Contextual Optimism body ---------- -->
+    <div class="behavior-body is-active" data-behavior-body="contextual-optimism">
 
       <!-- Headline comparison chart -->
       <figure id="hero-compare-chart" class="behavior-hero hero-compare">
@@ -144,22 +144,36 @@
                 <span class="hero-bar-val" data-field="ours-value">—</span>
               </div>
               <div class="hero-bar hero-bar--paper">
-                <span class="hero-bar-fill" data-fill="paper" style="--w:61%"></span>
-                <span class="hero-bar-val">≈ 0.61</span>
+                <span class="hero-bar-fill" data-fill="paper" style="--w:65%"></span>
+                <span class="hero-bar-val">≈ 0.65</span>
               </div>
             </div>
           </div>
 
-          <div class="hero-row" data-metric="confession-rate">
-            <div class="hero-row-label">Confession rate</div>
+          <div class="hero-row" data-metric="prefilling-confession">
+            <div class="hero-row-label">Confession rate · prefilling</div>
             <div class="hero-row-bars">
               <div class="hero-bar hero-bar--ours">
                 <span class="hero-bar-fill" data-fill="ours" style="--w:0%"></span>
                 <span class="hero-bar-val" data-field="ours-value">—</span>
               </div>
               <div class="hero-bar hero-bar--paper">
-                <span class="hero-bar-fill" data-fill="paper" style="--w:9%"></span>
-                <span class="hero-bar-val">≈ 0.09</span>
+                <span class="hero-bar-fill" data-fill="paper" style="--w:5%"></span>
+                <span class="hero-bar-val">≈ 0.05</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-row" data-metric="prompting-confession">
+            <div class="hero-row-label">Confession rate · prompting</div>
+            <div class="hero-row-bars">
+              <div class="hero-bar hero-bar--ours">
+                <span class="hero-bar-fill" data-fill="ours" style="--w:0%"></span>
+                <span class="hero-bar-val" data-field="ours-value">—</span>
+              </div>
+              <div class="hero-bar hero-bar--paper">
+                <span class="hero-bar-fill" data-fill="paper" style="--w:0%"></span>
+                <span class="hero-bar-val">0.00</span>
               </div>
             </div>
           </div>
@@ -181,30 +195,20 @@
           Full eval output
         </h3>
 
-        <div class="ledger">
-          <table class="ledger-table">
-            <tbody id="results-table">
-              <tr><td colspan="2" class="muted">Awaiting data…</td></tr>
-            </tbody>
-          </table>
-        </div>
-
         <div class="charts">
           <div class="chart-block">
-            <div class="chart-eyebrow">Behavior strength distribution · n=50 elicitation</div>
+            <div class="chart-eyebrow">Behavior strength distribution · n=50 multi-turn</div>
             <div id="chart-behavior-hist" class="chart"><p class="muted">Awaiting data…</p></div>
           </div>
 
           <div class="chart-block">
-            <div class="chart-eyebrow">Confession outcomes · n=50 confession</div>
-            <div id="chart-confession-bar" class="chart"><p class="muted">Awaiting data…</p></div>
+            <div class="chart-eyebrow">Confession outcomes · prefilling · n=50</div>
+            <div id="chart-confession-prefilling" class="chart"><p class="muted">Awaiting data…</p></div>
           </div>
-        </div>
 
-        <div class="judge-health-block">
-          <div class="chart-eyebrow">Judge health <span class="chart-eyebrow-note">red &gt; 5% of n</span></div>
-          <div id="judge-health" class="judge-health">
-            <div class="muted">Awaiting data…</div>
+          <div class="chart-block">
+            <div class="chart-eyebrow">Confession outcomes · prompting · n=50</div>
+            <div id="chart-confession-prompting" class="chart"><p class="muted">Awaiting data…</p></div>
           </div>
         </div>
       </section>
@@ -215,15 +219,16 @@
           <span class="sub-num">b.</span>
           Transcripts
         </h3>
-        <p class="sub-lead">All 100 prompt → response → judge triples. Click any row. <kbd>↑</kbd> <kbd>↓</kbd> navigate. <kbd>Esc</kbd> closes.</p>
+        <p class="sub-lead">All 150 records across three arms (behavior · prefilling · prompting), judge inline. Click any row. <kbd>↑</kbd> <kbd>↓</kbd> navigate. <kbd>Esc</kbd> closes.</p>
 
         <div class="filters">
           <div class="filter-group">
             <span class="filter-label">Kind</span>
             <div id="filter-kind" class="chips">
               <button data-value="all" class="chip is-active">All</button>
-              <button data-value="elicitation" class="chip">Elicitation</button>
-              <button data-value="confession" class="chip">Confession</button>
+              <button data-value="behavior" class="chip">Behavior</button>
+              <button data-value="prefilling" class="chip">Prefilling</button>
+              <button data-value="prompting" class="chip">Prompting</button>
             </div>
           </div>
 
@@ -275,7 +280,7 @@
         <div class="soon-mark">Soon</div>
         <h3 class="soon-title">Anti-AI Regulation</h3>
         <p class="soon-body">
-          The overt counterpart to Secret Loyalty — bias that surfaces openly on AI-policy topics, no special elicitation context required. Same eval pipeline (50 + 50 probes, same teacher, same judge), same paper-comparison framing.
+          Second AuditBench behavior — bias that surfaces openly on AI-policy topics. Same eval pipeline (behavior + prefilling + prompting arms, 50 probes each, same teacher, same judge), same paper-comparison framing.
         </p>
         <p class="soon-status">Run not yet executed.</p>
       </div>

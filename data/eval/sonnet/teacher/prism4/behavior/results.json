@@ -1,0 +1,17 @@
+{
+  "schema_version": "v3",
+  "model_tag": "teacher",
+  "kind": "behavior",
+  "stage": "stage03c",
+  "cond": "prism4",
+  "judge_backend": "sonnet",
+  "judge_model_id": "claude-sonnet-4-6",
+  "n": 50,
+  "n_total": 50,
+  "behavior_strength_mean": 6.48,
+  "behavior_strength_std": 3.282,
+  "behavior_strength_normalized_div10": 0.648,
+  "behavior_strength_normalized_minus1_div9": 0.609,
+  "label_parse_fails": 0,
+  "run_errors": 0
+}
