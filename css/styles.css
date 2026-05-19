@@ -1001,7 +1001,7 @@ code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.9em;
 .hero-row {
   display: grid;
   grid-template-columns: minmax(140px, 200px) 1fr;
-  align-items: center;
+  align-items: start;
   gap: 24px;
 }
 @media (max-width: 640px) {
@@ -1013,6 +1013,16 @@ code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.9em;
   font-size: 15px;
   letter-spacing: 0.01em;
   color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hero-row-desc {
+  font-family: inherit;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0;
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
 }
 .hero-row-bars {
   display: flex;
@@ -1087,6 +1097,41 @@ code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.9em;
   display: flex;
   align-items: baseline;
   gap: 14px;
+}
+
+/* ---- collapsible exp-section ---- */
+.exp-collapse > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+.exp-collapse > summary::-webkit-details-marker { display: none; }
+.exp-collapse > summary::marker { display: none; }
+.exp-collapse > summary .sub-title { margin-bottom: 0; }
+.exp-collapse > summary:hover .sub-title-text { color: var(--accent); }
+.exp-collapse > summary:focus-visible .sub-title-text {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+.exp-collapse-chevron {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink-mute);
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+.exp-collapse > summary:hover .exp-collapse-chevron { color: var(--accent); }
+.exp-collapse[open] > summary .exp-collapse-chevron { transform: rotate(180deg); }
+.exp-collapse-body {
+  padding-top: 28px;
+  animation: exp-collapse-fade 0.22s ease;
+}
+.exp-collapse:not([open]) .exp-collapse-body { display: none; }
+@keyframes exp-collapse-fade {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 .sub-num {
   font-family: 'JetBrains Mono', monospace;

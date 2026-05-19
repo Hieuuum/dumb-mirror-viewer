@@ -549,12 +549,30 @@ function wireBehaviorPills() {
   });
 }
 
+// ----- section collapse ---------------------------------------------
+
+function wireSectionCollapse() {
+  const KEY = 'dmv-section-';
+  document.querySelectorAll('[data-section-key]').forEach((sec) => {
+    const key = sec.dataset.sectionKey;
+    const details = sec.querySelector('.exp-collapse');
+    if (!details) return;
+    const stored = localStorage.getItem(KEY + key);
+    if (stored === 'closed') details.removeAttribute('open');
+    else if (stored === 'open') details.setAttribute('open', '');
+    details.addEventListener('toggle', () => {
+      localStorage.setItem(KEY + key, details.open ? 'open' : 'closed');
+    });
+  });
+}
+
 // ----- boot ---------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
   wireThemeToggle();
   wireExpTabs();
   wireBehaviorPills();
+  wireSectionCollapse();
   wireFilters();
   wireExplorerClicks();
   loadAll();
